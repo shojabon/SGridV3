@@ -1,12 +1,36 @@
 import json
 import os
 
+import uvicorn
+from fastapi import FastAPI
+
 
 class SGridV3Node:
 
-    def __init__(self):
+    def __init__(self, region: str, name: str, tag, master_key: str):
 
+        self.fast_api = FastAPI(debug=True)
 
+        from SGridNode.ModuleFunctions.Tool import ToolFunction
+        self.tool_function = ToolFunction(self)
+
+        from SGridNode.ModuleFunctions.Node import NodeFunction
+        self.node_function = NodeFunction(self)
+
+        from SGridNode.Endpoints.NodeEndpoint import NodeEndpoint
+        self.node_endpoint = NodeEndpoint(self)
+
+        self.config = {}
+        self.load_config("config.json")
+        if "node_id" not in self.config.keys():
+            self.config["node_id"] = self.tool_function.create_id_hash(self.tool_function.create_session_key(128))
+        self.config["region"] = region
+        self.config["name"] = name
+        self.config["tag"] = tag
+        self.config["master_key"] = master_key
+        self.save_config(self.config, "config.json")
+
+        uvicorn.run(self.fast_api, host="0.0.0.0", port=2000)
 
     def load_config(self, file: str):
         if not os.path.exists(file):
@@ -14,7 +38,7 @@ class SGridV3Node:
             d.write("{}")
             d.close()
         file = open(file, "r")
-        data = eval(file.read())
+        data = json.loads(file.read())
         file.close()
         return data
 
@@ -24,4 +48,4 @@ class SGridV3Node:
         file.close()
 
 if __name__ == '__main__':
-    grid = SGridV3Node()
+    grid = SGridV3Node("JAPAN", "TEST", None, "password")
