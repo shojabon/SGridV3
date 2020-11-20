@@ -1,3 +1,5 @@
+import traceback
+
 from starlette.responses import JSONResponse
 
 from SGridNode.main import SGridV3Node
@@ -32,8 +34,53 @@ class DockerEndpoint:
             if self.core.config["master_key"] != json["master_key"]:
                 return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
 
-            result = []
-            for container in self.core.docker.containers.list():
-                result.append(container.stats(stream=False))
+            try:
+                result = []
+                for container in self.core.docker.containers.list():
+                    result.append(container.stats(stream=False))
+                return JSONResponse({"body": result, "code": "Success"}, 200)
+            except Exception:
+                return JSONResponse({"body": traceback.format_exc(), "code": "error.internal"}, 500)
 
-            return JSONResponse({"body": result, "code": "Success"}, 200)
+
+        @self.core.fast_api.route("/docker/container/run", methods=["POST"])
+        async def container_run(request: Request):
+            json = await request.json()
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "image"]):
+                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+            if self.core.config["master_key"] != json["master_key"]:
+                return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
+            del json["master_key"]
+            try:
+                self.core.docker.containers.run(**json)
+                return JSONResponse({"body": "", "code": "Success"}, 200)
+            except Exception:
+                return JSONResponse({"body": traceback.format_exc(), "code": "error.internal"}, 500)
+
+        @self.core.fast_api.route("/docker/container/stop", methods=["POST"])
+        async def container_stop(request: Request):
+            json = await request.json()
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "id"]):
+                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+            if self.core.config["master_key"] != json["master_key"]:
+                return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
+
+            try:
+                self.core.docker.containers.get(json["id"]).stop()
+                return JSONResponse({"body": "", "code": "Success"}, 200)
+            except Exception:
+                return JSONResponse({"body": traceback.format_exc(), "code": "error.internal"}, 500)
+
+        @self.core.fast_api.route("/docker/container/start", methods=["POST"])
+        async def container_start(request: Request):
+            json = await request.json()
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "id"]):
+                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+            if self.core.config["master_key"] != json["master_key"]:
+                return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
+
+            try:
+                self.core.docker.containers.get(json["id"]).start()
+                return JSONResponse({"body": "", "code": "Success"}, 200)
+            except Exception:
+                return JSONResponse({"body": traceback.format_exc(), "code": "error.internal"}, 500)

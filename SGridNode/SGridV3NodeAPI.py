@@ -53,6 +53,42 @@ class SGridV3NodeAPI:
             return None
         return response["body"]
 
+    def container_run(self, image: str, **kwargs):
+        kwargs["master_key"] = self.master_key
+        kwargs["image"] = image
+        response = self.__post_data(self.api_endpoint + "/docker/container/run/", kwargs)
+        if response is None:
+            return False
+        return True
+
+    def container_stop(self, container_id: str):
+        payload = {
+            "master_key": self.master_key,
+            "id": container_id
+        }
+        response = self.__post_data(self.api_endpoint + "/docker/container/stop/", payload)
+        if response is None:
+            return False
+        return True
+
+    def container_start(self, container_id: str):
+        payload = {
+            "master_key": self.master_key,
+            "id": container_id
+        }
+        response = self.__post_data(self.api_endpoint + "/docker/container/start/", payload)
+        if response is None:
+            return False
+        return True
+
+
 if __name__ == '__main__':
     api = SGridV3NodeAPI("password", "http://127.0.0.1:2000/")
-    print(api.container_stats())
+    # payload = {
+    #     "tty": True,
+    #     "detach": True,
+    #     "name": "gridtest",
+    #     "remove": True
+    # }
+    # print(api.container_run("ubuntu:18.04", **payload))
+    print(api.container_start("3bdb"))
