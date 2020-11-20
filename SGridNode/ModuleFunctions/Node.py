@@ -7,8 +7,7 @@ class NodeFunction:
         self.core = core
 
     def node_info(self):
-        data = \
-        {
+        data = {
             "node_id": self.core.config["node_id"],
             "name": self.core.config["name"],
             "region": self.core.config["region"],

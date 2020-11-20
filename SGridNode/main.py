@@ -1,6 +1,7 @@
 import json
 import os
 
+import docker
 import uvicorn
 from fastapi import FastAPI
 
@@ -10,6 +11,7 @@ class SGridV3Node:
     def __init__(self, region: str, name: str, tag, master_key: str):
 
         self.fast_api = FastAPI(debug=True)
+        self.docker = docker.from_env()
 
         from SGridNode.ModuleFunctions.Tool import ToolFunction
         self.tool_function = ToolFunction(self)
@@ -19,6 +21,9 @@ class SGridV3Node:
 
         from SGridNode.Endpoints.NodeEndpoint import NodeEndpoint
         self.node_endpoint = NodeEndpoint(self)
+
+        from SGridNode.Endpoints.DockerEndpoint import DockerEndpoint
+        self.docker_endpoint = DockerEndpoint(self)
 
         self.config = {}
         self.load_config("config.json")

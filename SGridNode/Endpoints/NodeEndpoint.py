@@ -17,4 +17,4 @@ class NodeEndpoint:
                 return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
             if self.core.config["master_key"] != json["master_key"]:
                 return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
-            return JSONResponse(self.core.node_function.node_info(), 200)
+            return JSONResponse({"body": self.core.node_function.node_info(), "code": "Success"}, 200)
