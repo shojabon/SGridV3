@@ -1,5 +1,8 @@
 import hashlib
 import random
+import time
+
+import psutil
 
 from SGridNode.main import SGridV3Node
 
@@ -34,3 +37,44 @@ class ToolFunction:
             if par not in json_data.keys():
                 return False
         return True
+
+    def net_usage(self):
+        cache_1 = {}
+        for interface in psutil.net_if_stats().keys():
+            net_stat = psutil.net_io_counters(pernic=True, nowrap=True)[interface]
+            cache_1[interface] = {"in": net_stat.bytes_recv, "out": net_stat.bytes_sent}
+        time.sleep(1)
+        cache_2 = {}
+        for interface in psutil.net_if_stats().keys():
+            net_stat = psutil.net_io_counters(pernic=True, nowrap=True)[interface]
+            cache_2[interface] = {"in": net_stat.bytes_recv, "out": net_stat.bytes_sent}
+
+        result = {}
+
+        for interface in cache_1.keys():
+            net_in = round((cache_2[interface]["in"] - cache_1[interface]["in"]) / 1024 / 1024, 3)
+            net_out = round((cache_2[interface]["out"] - cache_1[interface]["out"]) / 1024 / 1024, 3)
+            result[interface] = {"in": net_in, "out": net_out}
+
+        return result
+
+    def disk_usage(self):
+        cache_1 = {}
+        keys = psutil.disk_io_counters(perdisk=True, nowrap=True).keys()
+        for interface in keys:
+            disk_stat = psutil.disk_io_counters(perdisk=True, nowrap=True)[interface]
+            cache_1[interface] = {"read": disk_stat.read_bytes, "write": disk_stat.write_bytes}
+        time.sleep(1)
+        cache_2 = {}
+        for interface in keys:
+            disk_stat = psutil.disk_io_counters(perdisk=True, nowrap=True)[interface]
+            cache_2[interface] = {"read": disk_stat.read_bytes, "write": disk_stat.write_bytes}
+
+        result = {}
+
+        for interface in cache_1.keys():
+            disk_read = round((cache_2[interface]["read"] - cache_1[interface]["read"]) / 1024 / 1024, 3)
+            disk_write = round((cache_2[interface]["write"] - cache_1[interface]["write"]) / 1024 / 1024, 3)
+            result[interface] = {"read": disk_read, "write": disk_write}
+
+        return result

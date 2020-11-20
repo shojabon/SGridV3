@@ -33,6 +33,15 @@ class SGridV3NodeAPI:
             return None
         return response["body"]
 
+    def node_status(self):
+        payload = {
+            "master_key": self.master_key,
+        }
+        response = self.__post_data(self.api_endpoint + "/node/status/", payload)
+        if response is None:
+            return None
+        return response["body"]
+
     # Docker function
     def container_list(self, all_containers=False):
         payload = {
@@ -81,6 +90,16 @@ class SGridV3NodeAPI:
             return False
         return True
 
+    def image_list(self, all_images=False):
+        payload = {
+            "master_key": self.master_key,
+            "all": all_images
+        }
+        response = self.__post_data(self.api_endpoint + "/docker/image/list/", payload)
+        if response is None:
+            return None
+        return response["body"]
+
 
 if __name__ == '__main__':
     api = SGridV3NodeAPI("password", "http://127.0.0.1:2000/")
@@ -91,4 +110,4 @@ if __name__ == '__main__':
     #     "remove": True
     # }
     # print(api.container_run("ubuntu:18.04", **payload))
-    print(api.container_start("3bdb"))
+    print(api.node_status())

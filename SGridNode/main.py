@@ -16,9 +16,6 @@ class SGridV3Node:
         from SGridNode.ModuleFunctions.Tool import ToolFunction
         self.tool_function = ToolFunction(self)
 
-        from SGridNode.ModuleFunctions.Node import NodeFunction
-        self.node_function = NodeFunction(self)
-
         from SGridNode.Endpoints.NodeEndpoint import NodeEndpoint
         self.node_endpoint = NodeEndpoint(self)
 
