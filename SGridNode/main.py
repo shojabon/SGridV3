@@ -10,6 +10,9 @@ class SGridV3Node:
 
     def __init__(self, region: str, name: str, tag, master_key: str):
 
+        os.makedirs("data_dir/sync", exist_ok=True)
+        os.makedirs("data_dir/ftp_data", exist_ok=True)
+
         self.fast_api = FastAPI(debug=True)
         self.docker = docker.from_env()
 
@@ -21,6 +24,9 @@ class SGridV3Node:
 
         from SGridNode.Endpoints.DockerEndpoint import DockerEndpoint
         self.docker_endpoint = DockerEndpoint(self)
+
+        from SGridNode.Endpoints.SyncEndpoint import SyncEndpoint
+        self.sync_endpoint = SyncEndpoint(self)
 
         self.config = {}
         self.load_config("config.json")

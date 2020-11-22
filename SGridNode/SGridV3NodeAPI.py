@@ -100,6 +100,16 @@ class SGridV3NodeAPI:
             return None
         return response["body"]
 
+    # Sync
+    def sync_list(self):
+        payload = {
+            "master_key": self.master_key,
+        }
+        response = self.__post_data(self.api_endpoint + "/sync/list/", payload)
+        if response is None:
+            return None
+        return response["body"]
+
 
 if __name__ == '__main__':
     api = SGridV3NodeAPI("password", "http://127.0.0.1:2000/")
@@ -110,4 +120,4 @@ if __name__ == '__main__':
     #     "remove": True
     # }
     # print(api.container_run("ubuntu:18.04", **payload))
-    print(api.node_status())
+    print(api.sync_list())
