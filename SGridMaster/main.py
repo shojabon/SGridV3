@@ -1,8 +1,12 @@
 import json
 import os
+from threading import Thread
 
 import uvicorn
 from fastapi import FastAPI
+
+from SGridMaster import private_variables
+from SGridMaster.API.MongodbAPI import SMongoDB
 
 
 class SGridV3Master:
@@ -10,6 +14,8 @@ class SGridV3Master:
     def __init__(self):
         self.fast_api = FastAPI(debug=True)
         os.makedirs("data_dir/sync", exist_ok=True)
+
+        self.mongo = SMongoDB(private_variables.mongo_host, private_variables.mongo_port, private_variables.mongo_user, private_variables.mongo_password, private_variables.mongo_database)
 
         self.nodes = self.load_config("nodes.json")
         self.config = self.load_config("config.json")
@@ -34,6 +40,7 @@ class SGridV3Master:
 
         self.sync_function.sync_all_nodes()
 
+        Thread(target=self.node_function.record_node_task).start()
 
         uvicorn.run(self.fast_api, host="0.0.0.0", port=2500)
 
