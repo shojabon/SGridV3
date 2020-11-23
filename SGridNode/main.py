@@ -19,15 +19,6 @@ class SGridV3Node:
         from SGridNode.ModuleFunctions.Tool import ToolFunction
         self.tool_function = ToolFunction(self)
 
-        from SGridNode.Endpoints.NodeEndpoint import NodeEndpoint
-        self.node_endpoint = NodeEndpoint(self)
-
-        from SGridNode.Endpoints.DockerEndpoint import DockerEndpoint
-        self.docker_endpoint = DockerEndpoint(self)
-
-        from SGridNode.Endpoints.SyncEndpoint import SyncEndpoint
-        self.sync_endpoint = SyncEndpoint(self)
-
         self.config = {}
         self.load_config("config.json")
         if "node_id" not in self.config.keys():
@@ -37,6 +28,18 @@ class SGridV3Node:
         self.config["tag"] = tag
         self.config["master_key"] = master_key
         self.save_config(self.config, "config.json")
+
+        from SGridNode.Endpoints.NodeEndpoint import NodeEndpoint
+        self.node_endpoint = NodeEndpoint(self)
+
+        from SGridNode.Endpoints.DockerEndpoint import DockerEndpoint
+        self.docker_endpoint = DockerEndpoint(self)
+
+        from SGridNode.Endpoints.SyncEndpoint import SyncEndpoint
+        self.sync_endpoint = SyncEndpoint(self)
+
+        from SGridNode.ModuleFunctions.MasterFTP import MasterFTPFunction
+        self.master_ftp_function = MasterFTPFunction(self)
 
         uvicorn.run(self.fast_api, host="0.0.0.0", port=2000)
 

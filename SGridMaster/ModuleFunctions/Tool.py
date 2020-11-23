@@ -1,10 +1,13 @@
+import glob
 import hashlib
+import os
 import random
 import time
 
 import psutil
 
 from SGridMaster.main import SGridV3Master
+from SGridNode.SGridV3NodeAPI import SGridV3NodeAPI
 
 
 class ToolFunction:
@@ -78,3 +81,39 @@ class ToolFunction:
             result[interface] = {"read": disk_read, "write": disk_write}
 
         return result
+
+    def is_node(self, node: str):
+        if node not in self.core.node_name_address.keys():
+            return False
+        return True
+
+    def get_raw_address_node(self, node: str):
+        if not self.is_node(node):
+            return None
+        address = self.core.node_name_address[node]
+        raw_address = str(address).replace("https://", "").replace("http://", "")
+        if raw_address[-1] == "/":
+            raw_address = raw_address[:-1]
+        raw_address = raw_address.split(":")
+        return raw_address[0]
+
+    def get_node_address(self, node: str):
+        if not self.is_node(node):
+            return None
+        address = self.core.node_name_address[node]
+        return address
+
+    def map_md5_local(self, path_location="data_dir/sync"):
+        paths = [x.replace("\\", "/") for x in glob.glob(path_location + "/*", recursive=True)]
+        result = {}
+        for path in paths:
+            if os.path.isfile(path):
+                result[path] = hashlib.md5(open(path, "rb").read()).hexdigest()
+            else:
+                result[path] = self.map_md5_local(path)
+        return result
+
+    def get_sgrid_node(self, node: str):
+        if not self.is_node(node):
+            return None
+        return SGridV3NodeAPI(self.core.config["master_key"], self.get_node_address(node))

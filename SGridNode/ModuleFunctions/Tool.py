@@ -1,4 +1,6 @@
+import glob
 import hashlib
+import os
 import random
 import time
 
@@ -77,4 +79,14 @@ class ToolFunction:
             disk_write = round((cache_2[interface]["write"] - cache_1[interface]["write"]) / 1024 / 1024, 3)
             result[interface] = {"read": disk_read, "write": disk_write}
 
+        return result
+
+    def map_md5_local(self, path_location="data_dir/sync"):
+        paths = [x.replace("\\", "/") for x in glob.glob(path_location + "/*", recursive=True)]
+        result = {}
+        for path in paths:
+            if os.path.isfile(path):
+                result[path] = hashlib.md5(open(path, "rb").read()).hexdigest()
+            else:
+                result[path] = self.map_md5_local(path)
         return result

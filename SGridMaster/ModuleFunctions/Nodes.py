@@ -16,4 +16,13 @@ class NodeFunction:
                     continue
                 self.core.nodes[node_ip] = info
                 self.core.nodes[node_ip]["enabled"] = True
+                self.core.nodes[node_ip]["sync_path"] = ["all"]
         self.core.save_config(self.core.nodes, "nodes.json")
+
+    def create_nodeid_to_address(self):
+        result = {}
+        for node_ip in self.core.nodes.keys():
+            if "node_id" not in self.core.nodes[node_ip]:
+                continue
+            result[self.core.nodes[node_ip]["name"]] = node_ip
+        return result
