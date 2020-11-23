@@ -52,11 +52,11 @@ class FTPFunction:
         self.handler.masquerade_address = "127.0.0.1"
         self.handler.core = core
 
-        # self.throttler = ThrottledDTPHandler
-        # self.throttler.read_limit = 1.5 * 1024
-        # self.throttler.write_limit = 1.5 * 1024
-        #
-        # self.handler.dtp_handler = self.throttler
+        self.throttler = ThrottledDTPHandler
+        self.throttler.read_limit = 1.5 * 1024
+        self.throttler.write_limit = 1.5 * 1024
+
+        self.handler.dtp_handler = self.throttler
 
         # FTP
         self.handler.authorizer = self.authorizer
@@ -73,4 +73,5 @@ class FTPFunction:
         for user in self.core.ftp_users.keys():
             data = self.core.ftp_users[user]
             os.makedirs("data_dir/ftp_data/users/" + str(user), exist_ok=True)
-            self.authorizer.add_user(user, data["password"], "data_dir/ftp_data/users/" + str(user), "elradfmwMT")
+            if not self.authorizer.has_user(user):
+                self.authorizer.add_user(user, data["password"], "data_dir/ftp_data/users/" + str(user), "elradfmwMT")

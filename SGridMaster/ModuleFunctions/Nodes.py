@@ -36,8 +36,8 @@ class NodeFunction:
         return result
 
     def record_node_status(self):
+        self.core.ftp_function.push_all_users()
         for node in self.core.node_name_address.keys():
-
             def fuc(name):
                 print("[LOGGER] Logging node status of " + name)
                 grid = self.core.tool_function.get_sgrid_node(name)
@@ -52,11 +52,14 @@ class NodeFunction:
                 self.core.mongo.insert_data("SGRID_node_stats", result)
 
                 result = grid.container_stats()
+                if result is None:
+                    return
                 for container in result:
                     container["date_time"] = datetime.now()
                     container["node"] = name
                     self.container_stats[container["name"]] = container
                     self.core.mongo.insert_data("SGRID_container_stats", container)
+
 
             Thread(target=fuc, args=(node, )).start()
 

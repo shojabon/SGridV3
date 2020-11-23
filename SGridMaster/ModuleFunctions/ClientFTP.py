@@ -34,13 +34,10 @@ class ClientFTPFunction:
 
     def push_all_users(self):
         for node in self.core.node_name_address.keys():
-            print("node ", node)
             node_address = self.core.tool_function.get_node_address(node)
             if "ftp_users" not in self.core.nodes[node_address]:
-                print("a")
                 continue
             grid = self.core.tool_function.get_sgrid_node(node)
             if grid is None:
-                print("b")
                 continue
             grid.ftp_user_set(self.core.nodes[node_address]["ftp_users"])
