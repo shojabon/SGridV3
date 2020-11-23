@@ -44,8 +44,6 @@ class SGridV3Node:
         from SGridNode.ModuleFunctions.MasterFTP import MasterFTPFunction
         self.master_ftp_function = MasterFTPFunction(self)
 
-        self.docker_function.load_images_from_sync()
-
         uvicorn.run(self.fast_api, host="0.0.0.0", port=2000)
 
     def load_config(self, file: str):

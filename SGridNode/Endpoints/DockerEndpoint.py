@@ -105,3 +105,16 @@ class DockerEndpoint:
                 return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
             self.core.docker_function.load_images_from_sync()
             return JSONResponse({"body": "", "code": "Success"}, 200)
+
+        @self.core.fast_api.route("/docker/image/delete", methods=["POST"])
+        async def image_build(request: Request):
+            json = await request.json()
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "image"]):
+                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+            if self.core.config["master_key"] != json["master_key"]:
+                return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
+            try:
+                self.core.docker.images.remove(json["image"])
+            except Exception:
+                return JSONResponse({"body": "Image Delete Error", "code": "error.internal"}, 500)
+            return JSONResponse({"body": "", "code": "Success"}, 200)

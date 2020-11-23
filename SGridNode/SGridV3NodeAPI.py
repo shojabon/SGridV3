@@ -90,12 +90,33 @@ class SGridV3NodeAPI:
             return False
         return True
 
+    # Images
+
     def image_list(self, all_images=False):
         payload = {
             "master_key": self.master_key,
             "all": all_images
         }
         response = self.__post_data(self.api_endpoint + "/docker/image/list/", payload)
+        if response is None:
+            return None
+        return response["body"]
+
+    def image_build(self):
+        payload = {
+            "master_key": self.master_key,
+        }
+        response = self.__post_data(self.api_endpoint + "/docker/image/build/", payload)
+        if response is None:
+            return None
+        return response["body"]
+
+    def image_delete(self, image: str):
+        payload = {
+            "master_key": self.master_key,
+            "image": image
+        }
+        response = self.__post_data(self.api_endpoint + "/docker/image/delete/", payload)
         if response is None:
             return None
         return response["body"]

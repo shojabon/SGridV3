@@ -27,20 +27,19 @@ class DockerFunction:
             images.append(tag[0])
 
         for image in [x.replace("\\", "/") for x in glob.glob("data_dir/sync/images/*.tar")]:
-            if image not in images:
+            image_name = image.split("/")[-1][:-4]
+            if image_name not in images:
 
-                def build(image_name):
-                    try:
-                        print("Building", image)
-                        file = open(image, "rb")
-                        stream = io.BytesIO(file.read())
-                        self.core.docker.images.build(fileobj=stream, tag=image_name, custom_context=True)
-                        stream.close()
-                        file.close()
-                        print("Build Complete", image)
-                    except Exception:
-                        print("Build Error", image_name)
+                try:
+                    print("Building", image_name)
+                    file = open(image, "rb")
+                    stream = io.BytesIO(file.read())
+                    self.core.docker.images.build(fileobj=stream, tag=image_name, custom_context=True, rm=True)
+                    stream.close()
+                    file.close()
+                    print("Build Complete", image_name)
+                except Exception:
+                    print(traceback.format_exc())
+                    print("Build Error", image_name)
 
-                Thread(target=build, args=(image.split("/")[-1][:-4],)).start()
-
-                print("Build Request Complete", image.split("/")[-1][:-4])
+                print("Build Request Complete", image_name)
