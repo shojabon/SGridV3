@@ -25,26 +25,31 @@ class SyncFunction:
         directory_result = []
         for remote_path in remote.keys():
             if type(remote[remote_path]) == dict:
-                #if path
+                # if path
                 if remote_path not in local.keys():
                     directory_result.append(remote_path)
 
                     def get_files(dic):
-                        result = []
+                        file, direct = [], []
                         for key in dic.keys():
                             if type(dic[key]) == dict:
-                                result += get_files(dic[key])
+                                direct.append(key)
+                                temp_result = get_files(dic[key])
+                                file += temp_result[0]
+                                direct += temp_result[1]
                             else:
-                                result.append(key)
-                        return result
-                    file_result += get_files(remote[remote_path])
+                                file.append(key)
+                        return file, direct
 
+                    temp_result = get_files(remote[remote_path])
+                    file_result += temp_result[0]
+                    directory_result += temp_result[1]
                     continue
                 temp_file_res, temp_direct_res = self.get_delete_path(local[remote_path], remote[remote_path])
                 file_result += temp_file_res
                 directory_result += temp_direct_res
             else:
-                #if file
+                # if file
                 if remote_path not in local:
                     file_result.append(remote_path)
                     continue
@@ -61,15 +66,20 @@ class SyncFunction:
                     directory_result.append(local_path)
 
                     def get_files(dic):
-                        result = []
+                        file, direct = [], []
                         for key in dic.keys():
                             if type(dic[key]) == dict:
-                                result += get_files(dic[key])
+                                direct.append(key)
+                                temp_result = get_files(dic[key])
+                                file += temp_result[0]
+                                direct += temp_result[1]
                             else:
-                                result.append(key)
-                        return result
-                    file_result += get_files(local[local_path])
+                                file.append(key)
+                        return file, direct
 
+                    temp_file, temp_direct = get_files(local[local_path])
+                    file_result += temp_file
+                    directory_result += temp_direct
                     continue
                 temp_file_res, temp_direct_res = self.get_create_path(local[local_path], remote[local_path])
                 file_result += temp_file_res
@@ -90,7 +100,7 @@ class SyncFunction:
         ftp.login("sgrid-master-user", self.core.config["master_key"])
 
         node_config = self.core.nodes[self.core.tool_function.get_node_address(node)]
-        #Load Required Paths
+        # Load Required Paths
         if len(node_config["sync_path"]) == 1 and node_config["sync_path"][0] == "all":
             sync_paths = [x.replace("\\", "/").split("/")[-1] for x in glob.glob("data_dir/sync/*", recursive=True)]
         else:
@@ -118,14 +128,14 @@ class SyncFunction:
             ftp.close()
             return
 
-        #Delete Files
+        # Delete Files
         delete_files, delete_directory = self.get_delete_path(local_sync, sgrid.sync_map())
         delete_files = [x[9:] for x in delete_files]
         delete_directory = [x[9:] for x in delete_directory]
 
         for file in delete_files:
             ftp.delete(file)
-        for file in delete_directory:
+        for file in sorted(delete_directory, key=len, reverse=True):
             ftp.rmd(file)
 
         # Create Files
@@ -139,6 +149,5 @@ class SyncFunction:
             file_object = open("data_dir/" + str(file), "rb")
             ftp.storbinary("STOR " + str(file), file_object)
             file_object.close()
-
 
         ftp.close()
