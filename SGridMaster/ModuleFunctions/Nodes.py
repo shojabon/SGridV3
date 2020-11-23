@@ -12,6 +12,7 @@ class NodeFunction:
         self.core = core
 
         self.status_cache = {}
+        self.container_stats = {}
 
     def register_new_nodes(self):
         for node_ip in self.core.nodes.keys():
@@ -49,9 +50,16 @@ class NodeFunction:
                 result["node"] = name
                 self.core.mongo.insert_data("SGRID_node_stats", result)
 
+                result = grid.container_stats()
+                for container in result:
+                    container["date_time"] = datetime.now()
+                    container["node"] = name
+                    self.container_stats[container["name"]] = container
+                    self.core.mongo.insert_data("SGRID_container_stats", container)
+
             Thread(target=fuc, args=(node, )).start()
 
     def record_node_task(self):
         while True:
             self.record_node_status()
-            time.sleep(5)
+            time.sleep(60)
