@@ -1,8 +1,11 @@
+# -*- coding:utf-8 -*-
+
 import ftplib
 import glob
 import hashlib
 import os
 import threading
+import traceback
 from ftplib import FTP
 
 from SGridMaster.main import SGridV3Master
@@ -99,7 +102,8 @@ class SyncFunction:
         try:
             print("[Sync] Starting calibration with ", node)
             ftp = FTP()
-            ftp.connect(host=self.core.tool_function.get_raw_address_node(node), port=2100)
+            ftp.connect(host=self.core.tool_function.get_raw_address_node(node), port=21)
+            ftp.encoding = "utf-8"
             ftp.login("sgrid-master-user", self.core.config["master_key"])
 
             node_config = self.core.nodes[self.core.tool_function.get_node_address(node)]
@@ -146,6 +150,7 @@ class SyncFunction:
             ftp.close()
             print("[Sync] Finished calibration with ", node)
         except Exception:
+            print(traceback.format_exc())
             print("[Sync] Exception in calibration with ", node)
 
     def sync_all_nodes(self):

@@ -131,6 +131,17 @@ class SGridV3NodeAPI:
             return None
         return response["body"]
 
+    # FTP
+    def ftp_user_set(self, users: dict):
+        payload = {
+            "master_key": self.master_key,
+            "users": users
+        }
+        response = self.__post_data(self.api_endpoint + "/ftp/users/set/", payload)
+        if response is None:
+            return None
+        return response["body"]
+
 
 if __name__ == '__main__':
     api = SGridV3NodeAPI("password", "http://127.0.0.1:2000/")

@@ -19,6 +19,7 @@ class SGridV3Master:
 
         self.nodes = self.load_config("nodes.json")
         self.config = self.load_config("config.json")
+
         if "master_key" not in self.config:
             self.config["master_key"] = ""
         self.save_config(self.config, "config.json")
@@ -32,6 +33,9 @@ class SGridV3Master:
         from SGridMaster.ModuleFunctions.Tool import ToolFunction
         self.tool_function = ToolFunction(self)
 
+        from SGridMaster.ModuleFunctions.ClientFTP import ClientFTPFunction
+        self.ftp_function = ClientFTPFunction(self)
+
         self.local_sync = self.tool_function.map_md5_local("data_dir/sync")
 
         self.node_name_address = self.node_function.create_nodeid_to_address()
@@ -41,6 +45,10 @@ class SGridV3Master:
         self.sync_function.sync_all_nodes()
 
         Thread(target=self.node_function.record_node_task).start()
+
+        self.ftp_function.push_all_users()
+
+
 
         uvicorn.run(self.fast_api, host="0.0.0.0", port=2500)
 

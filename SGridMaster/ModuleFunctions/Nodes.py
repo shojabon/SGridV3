@@ -24,6 +24,7 @@ class NodeFunction:
                 self.core.nodes[node_ip] = info
                 self.core.nodes[node_ip]["enabled"] = True
                 self.core.nodes[node_ip]["sync_path"] = ["all"]
+                self.core.nodes[node_ip]["ftp_users"] = {}
         self.core.save_config(self.core.nodes, "nodes.json")
 
     def create_nodeid_to_address(self):
