@@ -32,7 +32,7 @@ class SGridV3Master:
 
         self.node_function.register_new_nodes()
 
-        self.sync_function.sync_file_at_node("TEST")
+        self.sync_function.sync_all_nodes()
 
 
         uvicorn.run(self.fast_api, host="0.0.0.0", port=2500)
