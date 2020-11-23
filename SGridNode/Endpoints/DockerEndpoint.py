@@ -95,3 +95,13 @@ class DockerEndpoint:
                 return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
             lis = [json_class.loads(json_class.dumps(x.__dict__, default=lambda o: '<not serializable>')) for x in self.core.docker.images.list(all=json["all"])]
             return JSONResponse({"body": lis, "code": "Success"}, 200)
+
+        @self.core.fast_api.route("/docker/image/build", methods=["POST"])
+        async def image_build(request: Request):
+            json = await request.json()
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key"]):
+                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+            if self.core.config["master_key"] != json["master_key"]:
+                return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
+            self.core.docker_function.load_images_from_sync()
+            return JSONResponse({"body": "", "code": "Success"}, 200)

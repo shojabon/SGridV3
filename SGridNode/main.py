@@ -29,6 +29,9 @@ class SGridV3Node:
         self.config["master_key"] = master_key
         self.save_config(self.config, "config.json")
 
+        from SGridNode.ModuleFunctions.Docker import DockerFunction
+        self.docker_function = DockerFunction(self)
+
         from SGridNode.Endpoints.NodeEndpoint import NodeEndpoint
         self.node_endpoint = NodeEndpoint(self)
 
@@ -40,6 +43,8 @@ class SGridV3Node:
 
         from SGridNode.ModuleFunctions.MasterFTP import MasterFTPFunction
         self.master_ftp_function = MasterFTPFunction(self)
+
+        self.docker_function.load_images_from_sync()
 
         uvicorn.run(self.fast_api, host="0.0.0.0", port=2000)
 
