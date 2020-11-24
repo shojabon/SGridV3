@@ -1,6 +1,6 @@
 import json
 import os
-
+import sys
 import docker
 import uvicorn
 from fastapi import FastAPI
@@ -47,6 +47,9 @@ class SGridV3Node:
 
         from SGridNode.Endpoints.FTPEndpoint import FTPClientEndpoint
         self.ftp_endpoint = FTPClientEndpoint(self)
+
+        from SGridNode.Endpoints.FileEndpoint import FileEndpoint
+        self.file_endpoint = FileEndpoint(self)
 
 
 
