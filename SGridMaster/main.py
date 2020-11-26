@@ -46,7 +46,7 @@ class SGridV3Master:
 
         Thread(target=self.node_function.record_node_task).start()
 
-        self.ftp_function.push_all_users()
+        self.node_function.push_all_settings()
 
 
 

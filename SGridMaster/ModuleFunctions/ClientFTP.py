@@ -31,16 +31,3 @@ class ClientFTPFunction:
 
     def user_clear(self, node: str):
         pass
-
-    def push_all_users(self):
-        for node in self.core.node_name_address.keys():
-            try:
-                node_address = self.core.tool_function.get_node_address(node)
-                if "ftp_users" not in self.core.nodes[node_address]:
-                    continue
-                grid = self.core.tool_function.get_sgrid_node(node)
-                if grid is None:
-                    continue
-                grid.ftp_user_set(self.core.nodes[node_address]["ftp_users"])
-            except Exception:
-                pass

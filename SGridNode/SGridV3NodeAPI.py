@@ -142,6 +142,27 @@ class SGridV3NodeAPI:
             return None
         return response["body"]
 
+    # File
+    def file_settings_set(self, settings: dict):
+        payload = {
+            "master_key": self.master_key,
+            "settings": settings
+        }
+        response = self.__post_data(self.api_endpoint + "/file/setting/set/", payload)
+        if response is None:
+            return None
+        return response["body"]
+
+    def backup(self, user: str):
+        payload = {
+            "master_key": self.master_key,
+            "user": user
+        }
+        response = self.__post_data(self.api_endpoint + "/file/backup/", payload)
+        if response is None:
+            return False
+        return True
+
 
 if __name__ == '__main__':
     api = SGridV3NodeAPI("password", "http://127.0.0.1:2000/")
@@ -151,4 +172,4 @@ if __name__ == '__main__':
     #     "name": "gridtest",
     #     "remove": True
     # }
-    # print(api.container_run("ubuntu:18.04", **payload))
+    print(api.backup("sho"))

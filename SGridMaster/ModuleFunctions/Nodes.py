@@ -14,6 +14,20 @@ class NodeFunction:
         self.status_cache = {}
         self.container_stats = {}
 
+    def push_all_settings(self):
+        for node in self.core.node_name_address.keys():
+            try:
+                node_address = self.core.tool_function.get_node_address(node)
+                if "ftp_users" not in self.core.nodes[node_address]:
+                    continue
+                grid = self.core.tool_function.get_sgrid_node(node)
+                if grid is None:
+                    continue
+                grid.ftp_user_set(self.core.nodes[node_address]["ftp_users"])
+                grid.file_settings_set(self.core.config["object_storage_info"])
+            except Exception:
+                pass
+
     def register_new_nodes(self):
         for node_ip in self.core.nodes.keys():
             if "node_id" not in self.core.nodes[node_ip]:
@@ -36,7 +50,7 @@ class NodeFunction:
         return result
 
     def record_node_status(self):
-        self.core.ftp_function.push_all_users()
+        self.push_all_settings()
         for node in self.core.node_name_address.keys():
             def fuc(name):
                 print("[LOGGER] Logging node status of " + name)

@@ -1,6 +1,8 @@
 import json
 import os
 import sys
+
+import boto3
 import docker
 import uvicorn
 from fastapi import FastAPI
@@ -30,6 +32,21 @@ class SGridV3Node:
         self.save_config(self.config, "config.json")
         self.ftp_users = {}
 
+
+
+        self.object_storage_setting = {
+            "access_key": "OFYJ3DMC54YH413KF35U",
+            "bucket": "testdevbucket",
+            "endpoint_url": "https://ewr1.vultrobjects.com",
+            "secret_access_key": "7hoGXQfsCNnvHqC3x1sUxRF6kNkT181xCivg13nd"
+        }
+
+        self.boto = None
+
+        sess = boto3.Session(aws_access_key_id=self.object_storage_setting["access_key"],
+                             aws_secret_access_key=self.object_storage_setting["secret_access_key"])
+        self.boto = sess.client('s3', endpoint_url=self.object_storage_setting["endpoint_url"])
+
         from SGridNode.ModuleFunctions.Docker import DockerFunction
         self.docker_function = DockerFunction(self)
 
@@ -48,10 +65,11 @@ class SGridV3Node:
         from SGridNode.Endpoints.FTPEndpoint import FTPClientEndpoint
         self.ftp_endpoint = FTPClientEndpoint(self)
 
+        from SGridNode.ModuleFunctions.File import FileFunction
+        self.file_function = FileFunction(self)
+
         from SGridNode.Endpoints.FileEndpoint import FileEndpoint
         self.file_endpoint = FileEndpoint(self)
-
-
 
         uvicorn.run(self.fast_api, host="0.0.0.0", port=2000)
 
