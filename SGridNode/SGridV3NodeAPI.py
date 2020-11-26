@@ -153,12 +153,23 @@ class SGridV3NodeAPI:
             return None
         return response["body"]
 
-    def backup(self, user: str):
+    def backup_save(self, user: str):
         payload = {
             "master_key": self.master_key,
             "user": user
         }
-        response = self.__post_data(self.api_endpoint + "/file/backup/", payload)
+        response = self.__post_data(self.api_endpoint + "/file/backup/save/", payload)
+        if response is None:
+            return False
+        return True
+
+    def backup_load(self, user: str, key: str):
+        payload = {
+            "master_key": self.master_key,
+            "user": user,
+            "backup_key": key
+        }
+        response = self.__post_data(self.api_endpoint + "/file/backup/load/", payload)
         if response is None:
             return False
         return True
@@ -172,4 +183,4 @@ if __name__ == '__main__':
     #     "name": "gridtest",
     #     "remove": True
     # }
-    print(api.backup("sho"))
+    print(api.backup_load("sho", "1606417526"))

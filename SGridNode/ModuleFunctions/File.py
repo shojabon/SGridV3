@@ -33,6 +33,8 @@ class FileFunction:
         if not os.path.exists('data_dir/ftp_data/backup/' + str(user) + "-" + str(key) + ".zip"):
             return False
         try:
+            if os.path.exists("data_dir/ftp_data/users/" + str(user)):
+                shutil.rmtree("data_dir/ftp_data/users/" + str(user))
             shutil.unpack_archive('data_dir/ftp_data/backup/' + str(user) + "-" + str(key) + ".zip",
                                   "data_dir/ftp_data/users/" + str(user))
             return True
@@ -44,3 +46,8 @@ class FileFunction:
             return False
         os.remove('data_dir/ftp_data/backup/' + str(user) + "-" + str(key) + ".zip")
         return True
+
+    def clear_backup(self):
+        paths = [x.replace("\\", "/") for x in glob.glob("data_dir/ftp_data/backup/*.zip")]
+        for path in paths:
+            os.remove(path)
