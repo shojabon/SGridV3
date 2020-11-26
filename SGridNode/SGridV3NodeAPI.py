@@ -174,6 +174,16 @@ class SGridV3NodeAPI:
             return False
         return True
 
+    def nuke_user(self, user: str):
+        payload = {
+            "master_key": self.master_key,
+            "user": user
+        }
+        response = self.__post_data(self.api_endpoint + "/file/nuke/", payload)
+        if response is None:
+            return False
+        return True
+
 
 if __name__ == '__main__':
     api = SGridV3NodeAPI("password", "http://127.0.0.1:2000/")
@@ -183,4 +193,5 @@ if __name__ == '__main__':
     #     "name": "gridtest",
     #     "remove": True
     # }
-    print(api.backup_load("sho", "1606417526"))
+    #print(api.backup_load("sho", "1606417526"))
+    print(api.nuke_user("sho"))

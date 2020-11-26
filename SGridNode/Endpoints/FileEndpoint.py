@@ -1,4 +1,5 @@
 import os
+import shutil
 import traceback
 from threading import Thread
 
@@ -104,6 +105,36 @@ class FileEndpoint:
                 Thread(target=func).start()
 
             except Exception:
-                self.current_task.remove(user)
+                if user in self.current_task:
+                    self.current_task.remove(user)
+                return JSONResponse({"body": "Internal Error", "code": "error.internal"}, 500)
+            return JSONResponse({"body": "", "code": "Success"}, 200)
+
+        @self.core.fast_api.route("/file/nuke/", methods=["POST"])
+        async def nuke_user_data(request: Request):
+            json = await request.json()
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "user"]):
+                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+            if self.core.config["master_key"] != json["master_key"]:
+                return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
+            user = json["user"]
+            if user in self.current_task:
+                return JSONResponse({"body": "Task Already Exists", "code": "error.internal"}, 500)
+            if self.core.object_storage_setting == {} or self.core.boto is None:
+                return JSONResponse({"body": "Image Delete Error", "code": "error.internal"}, 500)
+            try:
+                if not os.path.exists("data_dir/ftp_data/users/" + str(user)):
+                    return JSONResponse({"body": "", "code": "Success"}, 200)
+
+                self.current_task.append(user)
+                shutil.rmtree("data_dir/ftp_data/users/" + str(user))
+                os.makedirs("data_dir/ftp_data/users/" + str(user), exist_ok=True)
+
+                if user in self.current_task:
+                    self.current_task.remove(user)
+
+            except Exception:
+                if user in self.current_task:
+                    self.current_task.remove(user)
                 return JSONResponse({"body": "Internal Error", "code": "error.internal"}, 500)
             return JSONResponse({"body": "", "code": "Success"}, 200)
