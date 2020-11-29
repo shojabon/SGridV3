@@ -36,6 +36,10 @@ class SGridV3Master:
         from SGridMaster.ModuleFunctions.ClientFTP import ClientFTPFunction
         self.ftp_function = ClientFTPFunction(self)
 
+        from SGridMaster.Endpoints.DockerEndpoint import DockerEndpoint
+        self.docker_endpoint = DockerEndpoint(self)
+
+
         self.local_sync = self.tool_function.map_md5_local("data_dir/sync")
 
         self.node_name_address = self.node_function.create_nodeid_to_address()

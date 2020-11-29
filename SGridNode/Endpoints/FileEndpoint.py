@@ -1,6 +1,5 @@
 import os
 import shutil
-import traceback
 from threading import Thread
 
 import boto3

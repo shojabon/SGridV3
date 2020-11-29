@@ -62,9 +62,8 @@ class SGridV3NodeAPI:
             return None
         return response["body"]
 
-    def container_run(self, image: str, **kwargs):
+    def container_run(self,  **kwargs):
         kwargs["master_key"] = self.master_key
-        kwargs["image"] = image
         response = self.__post_data(self.api_endpoint + "/docker/container/run/", kwargs)
         if response is None:
             return False
