@@ -39,10 +39,13 @@ class SGridV3Master:
         from SGridMaster.Endpoints.DockerEndpoint import DockerEndpoint
         self.docker_endpoint = DockerEndpoint(self)
 
+        from SGridMaster.Endpoints.NodeEndpoint import NodeEndpoint
+        self.node_endpoint = NodeEndpoint(self)
 
         self.local_sync = self.tool_function.map_md5_local("data_dir/sync")
 
         self.node_name_address = self.node_function.create_nodeid_to_address()
+        self.node_address_name = self.node_function.create_node_address_to_id()
 
         self.node_function.register_new_nodes()
 

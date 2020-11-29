@@ -49,6 +49,14 @@ class NodeFunction:
             result[self.core.nodes[node_ip]["name"]] = node_ip
         return result
 
+    def create_node_address_to_id(self):
+        result = {}
+        for node_ip in self.core.nodes.keys():
+            if "node_id" not in self.core.nodes[node_ip]:
+                continue
+            result[node_ip] = self.core.nodes[node_ip]["name"]
+        return result
+
     def record_node_status(self):
         self.push_all_settings()
         for node in self.core.node_name_address.keys():

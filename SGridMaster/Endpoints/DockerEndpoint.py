@@ -81,7 +81,6 @@ class DockerEndpoint:
             if not self.core.tool_function.is_node(json["node"]):
                 return JSONResponse({"body": "Node Not Valid", "code": "error.internal"}, 500)
 
-            #Caching
             node = json["node"]
             if node in self.container_list_time_cache.keys() and node in self.container_list_cache.keys() and datetime.now().timestamp() - self.container_list_time_cache[node] < 1:
                 return JSONResponse({"body": self.container_list_cache[node], "code": "Success"}, 200)
