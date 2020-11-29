@@ -1,4 +1,5 @@
 import traceback
+from datetime import datetime
 
 from starlette.responses import JSONResponse
 
@@ -10,6 +11,9 @@ class DockerEndpoint:
     def __init__(self, core: SGridV3Master):
         self.core = core
         self.register_endpoints()
+
+        self.container_list_cache = {}
+        self.container_list_time_cache = {}
 
     def register_endpoints(self):
         @self.core.fast_api.route("/docker/container/run", methods=["POST"])
@@ -76,11 +80,19 @@ class DockerEndpoint:
                 return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
             if not self.core.tool_function.is_node(json["node"]):
                 return JSONResponse({"body": "Node Not Valid", "code": "error.internal"}, 500)
+
+            #Caching
+            node = json["node"]
+            if node in self.container_list_time_cache.keys() and node in self.container_list_cache.keys() and datetime.now().timestamp() - self.container_list_time_cache[node] < 1:
+                return JSONResponse({"body": self.container_list_cache[node], "code": "Success"}, 200)
+
             try:
                 sgrid = self.core.tool_function.get_sgrid_node(json["node"])
                 result = sgrid.container_list(name_only=json["name_only"])
                 if result is None:
                     return JSONResponse({"body": "Internal Error", "code": "error.internal"}, 500)
+                self.container_list_cache[node] = result
+                self.container_list_time_cache[node] = datetime.now().timestamp()
             except Exception:
                 return JSONResponse({"body": "Internal Error", "code": "error.internal"}, 500)
             return JSONResponse({"body": result, "code": "Success"}, 200)

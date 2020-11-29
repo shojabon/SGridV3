@@ -72,4 +72,3 @@ class SGridV3MasterAPI:
 if __name__ == '__main__':
     grid = SGridV3MasterAPI("password", "http://127.0.0.1:2500/")
     #print(grid.container_run("TEST", "ubuntu:18.04", {"name": "test", "remove": True, "tty": True, "detach": True}))
-    print(grid.container_list("TEST"))
