@@ -2,6 +2,7 @@ import json
 import os
 from threading import Thread
 
+import boto3
 import uvicorn
 from fastapi import FastAPI
 
@@ -19,6 +20,10 @@ class SGridV3Master:
 
         self.nodes = self.load_config("nodes.json")
         self.config = self.load_config("config.json")
+
+        sess = boto3.Session(aws_access_key_id=self.config["object_storage_info"]["access_key"],
+                             aws_secret_access_key=self.config["object_storage_info"]["secret_access_key"])
+        self.boto = sess.client('s3', endpoint_url=self.config["object_storage_info"]["endpoint_url"])
 
         if "master_key" not in self.config:
             self.config["master_key"] = ""
@@ -42,6 +47,9 @@ class SGridV3Master:
         from SGridMaster.Endpoints.NodeEndpoint import NodeEndpoint
         self.node_endpoint = NodeEndpoint(self)
 
+        from SGridMaster.Endpoints.FileEndpoint import FileEndpoint
+        self.file_endpoint = FileEndpoint(self)
+
         self.local_sync = self.tool_function.map_md5_local("data_dir/sync")
 
         self.node_name_address = self.node_function.create_nodeid_to_address()
@@ -54,8 +62,6 @@ class SGridV3Master:
         Thread(target=self.node_function.record_node_task).start()
 
         self.node_function.push_all_settings()
-
-
 
         uvicorn.run(self.fast_api, host="0.0.0.0", port=2500)
 
