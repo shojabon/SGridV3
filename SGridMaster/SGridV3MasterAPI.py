@@ -58,6 +58,18 @@ class SGridV3MasterAPI:
             return False
         return True
 
+    def container_list(self, node: str, name_only=True):
+        payload = {
+            "master_key": self.master_key,
+            "node": node,
+            "name_only": name_only
+        }
+        response = self.__post_data(self.api_endpoint + "/docker/container/list/", payload)
+        if response is None:
+            return None
+        return response["body"]
+
 if __name__ == '__main__':
     grid = SGridV3MasterAPI("password", "http://127.0.0.1:2500/")
     #print(grid.container_run("TEST", "ubuntu:18.04", {"name": "test", "remove": True, "tty": True, "detach": True}))
+    print(grid.container_list("TEST"))

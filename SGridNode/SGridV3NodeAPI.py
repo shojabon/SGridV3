@@ -43,10 +43,11 @@ class SGridV3NodeAPI:
         return response["body"]
 
     # Docker function
-    def container_list(self, all_containers=False):
+    def container_list(self, all_containers=False, name_only=True):
         payload = {
             "master_key": self.master_key,
-            "all": all_containers
+            "all": all_containers,
+            "name_only": name_only
         }
         response = self.__post_data(self.api_endpoint + "/docker/container/list/", payload)
         if response is None:

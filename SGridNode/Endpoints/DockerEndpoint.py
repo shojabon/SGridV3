@@ -17,13 +17,18 @@ class DockerEndpoint:
         @self.core.fast_api.route("/docker/container/list", methods=["POST"])
         async def container_list(request: Request):
             json = await request.json()
-            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "all"]):
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "all", "name_only"]):
                 return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
             if self.core.config["master_key"] != json["master_key"]:
                 return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
             if type(json["all"]) != bool:
                 return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
-            lis = [json_class.loads(json_class.dumps(x.__dict__, default=lambda o: '<not serializable>')) for x in self.core.docker.containers.list(json["all"])]
+            if json["name_only"]:
+                lis = [json_class.loads(json_class.dumps(x.__dict__, default=lambda o: '<not serializable>'))["attrs"]["Name"] for x in
+                       self.core.docker.containers.list(json["all"])]
+            else:
+                lis = [json_class.loads(json_class.dumps(x.__dict__, default=lambda o: '<not serializable>')) for x in
+                       self.core.docker.containers.list(json["all"])]
             return JSONResponse({"body": lis, "code": "Success"}, 200)
 
         @self.core.fast_api.route("/docker/container/stats", methods=["POST"])
@@ -107,7 +112,7 @@ class DockerEndpoint:
             return JSONResponse({"body": "", "code": "Success"}, 200)
 
         @self.core.fast_api.route("/docker/image/delete", methods=["POST"])
-        async def image_build(request: Request):
+        async def image_delete(request: Request):
             json = await request.json()
             if not self.core.tool_function.does_post_params_exist(json, ["master_key", "image"]):
                 return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
