@@ -137,3 +137,18 @@ class FileEndpoint:
                     self.current_task.remove(user)
                 return JSONResponse({"body": "Internal Error", "code": "error.internal"}, 500)
             return JSONResponse({"body": "", "code": "Success"}, 200)
+
+        @self.core.fast_api.route("/file/unzip/", methods=["POST"])
+        async def file_unzip(request: Request):
+            json = await request.json()
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "target", "destination"]):
+                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+            if self.core.config["master_key"] != json["master_key"]:
+                return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
+            try:
+                if not os.path.exists(json["target"]):
+                    return JSONResponse({"body": "Path Invalid", "code": "path.invalid"}, 401)
+                shutil.unpack_archive(json["target"], json["destination"])
+            except Exception:
+                return JSONResponse({"body": "Internal Error", "code": "error.internal"}, 500)
+            return JSONResponse({"body": "", "code": "Success"}, 200)

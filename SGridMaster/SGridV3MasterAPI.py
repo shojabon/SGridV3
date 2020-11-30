@@ -124,7 +124,6 @@ class SGridV3MasterAPI:
             return False
         return True
 
-
     def nuke_user(self, node: str, user: str):
         payload = {
             "master_key": self.master_key,
@@ -136,6 +135,18 @@ class SGridV3MasterAPI:
             return False
         return True
 
+    def file_unzip(self, node: str, target: str, destination: str):
+        payload = {
+            "master_key": self.master_key,
+            "node": node,
+            "target": target,
+            "destination": destination
+        }
+        response = self.__post_data(self.api_endpoint + "/file/unzip", payload)
+        if response is None:
+            return False
+        return True
+
 
 if __name__ == '__main__':
     grid = SGridV3MasterAPI("password", "http://127.0.0.1:2500/")
@@ -143,4 +154,4 @@ if __name__ == '__main__':
     #print(grid.backup_list("sho"))
     #print(grid.backup_load("TEST", "sho", "1606417526"))
     #print(grid.nuke_user("TEST", "sho"))
-    print(grid.backup_delete("sho", "1606653661"))
+    print(grid.file_unzip("TEST", "data_dir/sync/images/sho-1606417526.zip", "data_dir/ftp_data/users/sho/"))

@@ -55,8 +55,6 @@ class FileEndpoint:
                 return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
             if not self.core.tool_function.is_node(json["node"]):
                 return JSONResponse({"body": "Node Not Valid", "code": "error.internal"}, 500)
-            if json["user"] in self.dir_cache.keys():
-                return JSONResponse({"body": self.dir_cache[json["user"]], "code": "Success"}, 200)
             try:
                 sgrid = self.core.tool_function.get_sgrid_node(json["node"])
                 result = sgrid.backup_save(json["user"])
@@ -77,8 +75,6 @@ class FileEndpoint:
                 return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
             if not self.core.tool_function.is_node(json["node"]):
                 return JSONResponse({"body": "Node Not Valid", "code": "error.internal"}, 500)
-            if json["user"] in self.dir_cache.keys():
-                return JSONResponse({"body": self.dir_cache[json["user"]], "code": "Success"}, 200)
             try:
                 sgrid = self.core.tool_function.get_sgrid_node(json["node"])
                 result = sgrid.backup_load(json["user"], json["key"])
@@ -97,8 +93,6 @@ class FileEndpoint:
                 return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
             if not self.core.tool_function.is_node(json["node"]):
                 return JSONResponse({"body": "Node Not Valid", "code": "error.internal"}, 500)
-            if json["user"] in self.dir_cache.keys():
-                return JSONResponse({"body": self.dir_cache[json["user"]], "code": "Success"}, 200)
             try:
                 sgrid = self.core.tool_function.get_sgrid_node(json["node"])
                 result = sgrid.nuke_user(json["user"])
@@ -115,10 +109,32 @@ class FileEndpoint:
                 return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
             if self.core.config["master_key"] != json["master_key"]:
                 return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
-            if json["user"] in self.dir_cache.keys():
-                return JSONResponse({"body": self.dir_cache[json["user"]], "code": "Success"}, 200)
             try:
                 self.core.boto.delete_object(Bucket=self.core.config["object_storage_info"]["bucket"], Key="backup/" + str(json["user"]) + "/" + str(json["user"]) + "-" + str(json["key"]) + ".zip")
+                if json["user"] in self.dir_cache:
+                    del self.dir_cache[json["user"]]
+                return JSONResponse({"body": "", "code": "Success"}, 200)
+            except Exception:
+                if json["user"] in self.dir_cache:
+                    del self.dir_cache[json["user"]]
+                return JSONResponse({"body": "Internal Error", "code": "error.internal"}, 500)
+
+        @self.core.fast_api.route("/file/unzip", methods=["POST"])
+        async def file_unzip(request: Request):
+            json = await request.json()
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "node", "target", "destination"]):
+                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+            if self.core.config["master_key"] != json["master_key"]:
+                return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
+            if not self.core.tool_function.is_node(json["node"]):
+                return JSONResponse({"body": "Node Not Valid", "code": "error.internal"}, 500)
+            try:
+                sgrid = self.core.tool_function.get_sgrid_node(json["node"])
+                result = sgrid.file_unzip(json["target"], json["destination"])
+                if not result:
+                    return JSONResponse({"body": "Internal Error", "code": "error.internal"}, 500)
+                if json["user"] in self.dir_cache:
+                    del self.dir_cache[json["user"]]
                 return JSONResponse({"body": "", "code": "Success"}, 200)
             except Exception:
                 return JSONResponse({"body": "Internal Error", "code": "error.internal"}, 500)

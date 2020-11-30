@@ -184,6 +184,17 @@ class SGridV3NodeAPI:
             return False
         return True
 
+    def file_unzip(self, target: str, destination: str):
+        payload = {
+            "master_key": self.master_key,
+            "target": target,
+            "destination": destination
+        }
+        response = self.__post_data(self.api_endpoint + "/file/unzip/", payload)
+        if response is None:
+            return False
+        return True
+
 
 if __name__ == '__main__':
     api = SGridV3NodeAPI("password", "http://127.0.0.1:2000/")
@@ -194,4 +205,4 @@ if __name__ == '__main__':
     #     "remove": True
     # }
     #print(api.backup_load("sho", "1606417526"))
-    print(api.nuke_user("sho"))
+    print(api.file_unzip("data_dir/sho-1606417526.zip", "data_dir/ftp_data/users/sho/"))
