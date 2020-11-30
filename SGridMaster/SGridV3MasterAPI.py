@@ -90,6 +90,15 @@ class SGridV3MasterAPI:
             return True
         return False
 
+    def get_node_ftp(self, node: str):
+        if not self.is_node(node):
+            return None
+        node_data = self.node_list_cache[node]
+        node_address = node_data["address"][7:]
+        if node_address[-1] == "/":
+            node_address = str(node_address[:-1]).split(":")[0]
+        return FTP(host=node_address, user="sgrid-master-user", passwd=self.master_key)
+
     # File Function
     def backup_list(self, user: str):
         payload = {
@@ -157,16 +166,6 @@ class SGridV3MasterAPI:
         if response is None:
             return False
         return True
-
-    def get_node_ftp(self, node: str):
-        if not self.is_node(node):
-            return None
-        node_data = self.node_list_cache[node]
-        node_address = node_data["address"][7:]
-        if node_address[-1] == "/":
-            node_address = str(node_address[:-1]).split(":")[0]
-        return FTP(host=node_address, user="sgrid-master-user", passwd=self.master_key)
-
 
 if __name__ == '__main__':
     grid = SGridV3MasterAPI("password", "http://127.0.0.1:2500/")

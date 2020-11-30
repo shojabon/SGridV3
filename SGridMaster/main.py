@@ -6,7 +6,6 @@ import boto3
 import uvicorn
 from fastapi import FastAPI
 
-from SGridMaster import private_variables
 from SGridMaster.API.MongodbAPI import SMongoDB
 
 
@@ -16,10 +15,12 @@ class SGridV3Master:
         self.fast_api = FastAPI(debug=True)
         os.makedirs("data_dir/sync", exist_ok=True)
 
-        self.mongo = SMongoDB(private_variables.mongo_host, private_variables.mongo_port, private_variables.mongo_user, private_variables.mongo_password, private_variables.mongo_database)
 
         self.nodes = self.load_config("nodes.json")
         self.config = self.load_config("config.json")
+
+        self.mongo = SMongoDB(self.config["mongo"]["host"], self.config["mongo"]["port"], self.config["mongo"]["user"],
+                              self.config["mongo"]["password"], self.config["mongo"]["database"])
 
         sess = boto3.Session(aws_access_key_id=self.config["object_storage_info"]["access_key"],
                              aws_secret_access_key=self.config["object_storage_info"]["secret_access_key"])
