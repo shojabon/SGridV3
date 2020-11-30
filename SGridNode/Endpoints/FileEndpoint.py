@@ -1,5 +1,6 @@
 import os
 import shutil
+import traceback
 from threading import Thread
 
 import boto3
@@ -119,8 +120,6 @@ class FileEndpoint:
             user = json["user"]
             if user in self.current_task:
                 return JSONResponse({"body": "Task Already Exists", "code": "error.internal"}, 500)
-            if self.core.object_storage_setting == {} or self.core.boto is None:
-                return JSONResponse({"body": "Image Delete Error", "code": "error.internal"}, 500)
             try:
                 if not os.path.exists("data_dir/ftp_data/users/" + str(user)):
                     return JSONResponse({"body": "", "code": "Success"}, 200)
@@ -133,6 +132,7 @@ class FileEndpoint:
                     self.current_task.remove(user)
 
             except Exception:
+                print(traceback.format_exc())
                 if user in self.current_task:
                     self.current_task.remove(user)
                 return JSONResponse({"body": "Internal Error", "code": "error.internal"}, 500)

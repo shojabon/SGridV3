@@ -90,7 +90,43 @@ class SGridV3MasterAPI:
             return None
         return response["body"]
 
+    def backup_save(self, node: str, user: str):
+        payload = {
+            "master_key": self.master_key,
+            "user": user,
+            "node": node
+        }
+        response = self.__post_data(self.api_endpoint + "/file/backup/save", payload)
+        if response is None:
+            return False
+        return True
+
+    def backup_load(self, node: str, user: str, key: str):
+        payload = {
+            "master_key": self.master_key,
+            "user": user,
+            "node": node,
+            "key": key
+        }
+        response = self.__post_data(self.api_endpoint + "/file/backup/load", payload)
+        if response is None:
+            return False
+        return True
+
+    def nuke_user(self, node: str, user: str):
+        payload = {
+            "master_key": self.master_key,
+            "user": user,
+            "node": node
+        }
+        response = self.__post_data(self.api_endpoint + "/file/nuke", payload)
+        if response is None:
+            return False
+        return True
+
 if __name__ == '__main__':
     grid = SGridV3MasterAPI("password", "http://127.0.0.1:2500/")
     #print(grid.container_run("TEST", "ubuntu:18.04", {"name": "test", "remove": True, "tty": True, "detach": True}))
-    print(grid.backup_list("sho"))
+    #print(grid.backup_list("sho"))
+    #print(grid.backup_load("TEST", "sho", "1606417526"))
+    #print(grid.nuke_user("TEST", "sho"))
