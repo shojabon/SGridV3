@@ -150,7 +150,6 @@ class SyncFunction:
             ftp.close()
             print("[Sync] Finished calibration with ", node)
         except Exception:
-            print(traceback.format_exc())
             print("[Sync] Exception in calibration with ", node)
 
     def sync_all_nodes(self):

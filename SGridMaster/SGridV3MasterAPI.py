@@ -167,8 +167,45 @@ class SGridV3MasterAPI:
             return False
         return True
 
+    # FTP User
+
+    def ftp_user_add(self, node: str, user: str, password: str, limit_mb: int):
+        payload = {
+            "master_key": self.master_key,
+            "node": node,
+            "user": user,
+            "password": password,
+            "limit_mb": limit_mb
+        }
+        response = self.__post_data(self.api_endpoint + "/ftp/user/add", payload)
+        if response is None:
+            return False
+        return True
+
+    def ftp_user_remove(self, node: str, user: str):
+        payload = {
+            "master_key": self.master_key,
+            "node": node,
+            "user": user,
+        }
+        response = self.__post_data(self.api_endpoint + "/ftp/user/remove", payload)
+        if response is None:
+            return False
+        return True
+
+    def ftp_user_list(self):
+        payload = {
+            "master_key": self.master_key,
+        }
+        response = self.__post_data(self.api_endpoint + "/ftp/user/list", payload)
+        if response is None:
+            return None
+        return response["body"]
+
 if __name__ == '__main__':
     grid = SGridV3MasterAPI("password", "http://127.0.0.1:2500/")
+    #print(grid.ftp_user_add("TEST", "asdasda", "asdaasd", 10))
+    #print(grid.ftp_user_remove("TEST", "asdasda"))
     #print(grid.container_run("TEST", "ubuntu:18.04", {"name": "test", "remove": True, "tty": True, "detach": True}))
     #print(grid.backup_list("sho"))
     #print(grid.backup_load("TEST", "sho", "1606417526"))

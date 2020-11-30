@@ -51,6 +51,9 @@ class SGridV3Master:
         from SGridMaster.Endpoints.FileEndpoint import FileEndpoint
         self.file_endpoint = FileEndpoint(self)
 
+        from SGridMaster.Endpoints.FTPEndpoint import FTPEndpoint
+        self.ftp_endpoint = FTPEndpoint(self)
+
         self.local_sync = self.tool_function.map_md5_local("data_dir/sync")
 
         self.node_name_address = self.node_function.create_nodeid_to_address()

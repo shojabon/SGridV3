@@ -20,7 +20,6 @@ class SGridV3NodeAPI:
             data = json.loads(response.text)
             return data
         except Exception:
-            print(traceback.format_exc())
             return None
 
     # Node functions
