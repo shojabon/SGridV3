@@ -1,5 +1,6 @@
 import json
 import traceback
+from ftplib import FTP
 
 import requests
 
@@ -11,6 +12,8 @@ class SGridV3MasterAPI:
         if api_endpoint[-1] == "/":
             api_endpoint = api_endpoint[:-1]
         self.api_endpoint = api_endpoint
+
+        self.node_list_cache = {}
 
     def __post_data(self, url: str, payload: dict):
         try:
@@ -78,6 +81,14 @@ class SGridV3MasterAPI:
         if response is None:
             return None
         return response["body"]
+
+    def is_node(self, node: str):
+        if node in self.node_list_cache.keys():
+            return True
+        self.node_list_cache = self.node_list()
+        if node in self.node_list_cache.keys():
+            return True
+        return False
 
     # File Function
     def backup_list(self, user: str):
@@ -147,6 +158,15 @@ class SGridV3MasterAPI:
             return False
         return True
 
+    def get_node_ftp(self, node: str):
+        if not self.is_node(node):
+            return None
+        node_data = self.node_list_cache[node]
+        node_address = node_data["address"][7:]
+        if node_address[-1] == "/":
+            node_address = str(node_address[:-1]).split(":")[0]
+        return FTP(host=node_address, user="sgrid-master-user", passwd=self.master_key)
+
 
 if __name__ == '__main__':
     grid = SGridV3MasterAPI("password", "http://127.0.0.1:2500/")
@@ -154,4 +174,3 @@ if __name__ == '__main__':
     #print(grid.backup_list("sho"))
     #print(grid.backup_load("TEST", "sho", "1606417526"))
     #print(grid.nuke_user("TEST", "sho"))
-    print(grid.file_unzip("TEST", "data_dir/sync/images/sho-1606417526.zip", "data_dir/ftp_data/users/sho/"))
