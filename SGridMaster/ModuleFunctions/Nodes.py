@@ -2,7 +2,7 @@ import time
 from datetime import datetime
 from threading import Thread
 
-from SGridMaster.main import SGridV3Master
+from main import SGridV3Master
 from SGridNode.SGridV3NodeAPI import SGridV3NodeAPI
 
 

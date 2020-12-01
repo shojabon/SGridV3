@@ -2,7 +2,7 @@ import traceback
 
 from starlette.responses import JSONResponse
 
-from SGridMaster.main import SGridV3Master
+from main import SGridV3Master
 from fastapi import Request
 
 class FileEndpoint:

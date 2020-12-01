@@ -2,11 +2,14 @@ import json
 import os
 from threading import Thread
 
+import sys
+sys.path.append('../')
+
 import boto3
 import uvicorn
 from fastapi import FastAPI
 
-from SGridMaster.API.MongodbAPI import SMongoDB
+from API.MongodbAPI import SMongoDB
 
 
 class SGridV3Master:

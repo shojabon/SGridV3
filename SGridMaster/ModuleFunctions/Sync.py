@@ -8,7 +8,7 @@ import threading
 import traceback
 from ftplib import FTP
 
-from SGridMaster.main import SGridV3Master
+from main import SGridV3Master
 from SGridNode.SGridV3NodeAPI import SGridV3NodeAPI
 
 
