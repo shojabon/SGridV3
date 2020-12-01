@@ -3,7 +3,7 @@ from datetime import datetime
 from threading import Thread
 
 from main import SGridV3Master
-from SGridNode.SGridV3NodeAPI import SGridV3NodeAPI
+from API.SGridV3NodeAPI import SGridV3NodeAPI
 
 
 class NodeFunction:

@@ -7,7 +7,7 @@ import time
 import psutil
 
 from main import SGridV3Master
-from SGridNode.SGridV3NodeAPI import SGridV3NodeAPI
+from API.SGridV3NodeAPI import SGridV3NodeAPI
 
 
 class ToolFunction:

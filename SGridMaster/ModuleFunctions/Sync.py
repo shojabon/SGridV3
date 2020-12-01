@@ -1,15 +1,10 @@
 # -*- coding:utf-8 -*-
 
-import ftplib
 import glob
-import hashlib
-import os
 import threading
-import traceback
 from ftplib import FTP
 
 from main import SGridV3Master
-from SGridNode.SGridV3NodeAPI import SGridV3NodeAPI
 
 
 class SyncFunction:
