@@ -1,4 +1,4 @@
-from main import SGridV3Master
+from MasterMain import SGridV3Master
 
 
 class ClientFTPFunction:

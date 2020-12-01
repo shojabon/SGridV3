@@ -6,7 +6,7 @@ from pyftpdlib.authorizers import DummyAuthorizer
 from pyftpdlib.handlers import FTPHandler, ThrottledDTPHandler
 from pyftpdlib.servers import FTPServer
 
-from SGridNode.main import SGridV3Node
+from SGridNode.NodeMain import SGridV3Node
 
 
 class CustomHandler(FTPHandler):

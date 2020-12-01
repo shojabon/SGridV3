@@ -6,7 +6,7 @@ from threading import Thread
 import boto3
 from starlette.responses import JSONResponse
 
-from SGridNode.main import SGridV3Node
+from SGridNode.NodeMain import SGridV3Node
 from fastapi import Request
 import json as json_class
 

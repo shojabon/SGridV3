@@ -6,7 +6,7 @@ import time
 
 import psutil
 
-from main import SGridV3Master
+from MasterMain import SGridV3Master
 from API.SGridV3NodeAPI import SGridV3NodeAPI
 
 

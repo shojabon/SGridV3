@@ -5,7 +5,7 @@ from os import walk
 import psutil
 from starlette.responses import JSONResponse
 
-from SGridNode.main import SGridV3Node
+from SGridNode.NodeMain import SGridV3Node
 from fastapi import Request
 
 class SyncEndpoint:

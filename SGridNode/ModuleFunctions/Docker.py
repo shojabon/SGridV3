@@ -1,15 +1,9 @@
 import glob
-import hashlib
 import io
 import os
-import random
-import time
 import traceback
-from threading import Thread
 
-import psutil
-
-from SGridNode.main import SGridV3Node
+from SGridNode.NodeMain import SGridV3Node
 
 
 class DockerFunction:

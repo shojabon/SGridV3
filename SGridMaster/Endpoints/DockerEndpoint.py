@@ -3,7 +3,7 @@ from datetime import datetime
 
 from starlette.responses import JSONResponse
 
-from main import SGridV3Master
+from MasterMain import SGridV3Master
 from fastapi import Request
 
 class DockerEndpoint:

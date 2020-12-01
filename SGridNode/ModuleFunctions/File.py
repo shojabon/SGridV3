@@ -12,7 +12,7 @@ from threading import Thread
 import boto3
 import psutil
 
-from SGridNode.main import SGridV3Node
+from SGridNode.NodeMain import SGridV3Node
 
 
 class FileFunction:
