@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 import sys
@@ -91,4 +92,10 @@ class SGridV3Node:
         file.close()
 
 if __name__ == '__main__':
-    grid = SGridV3Node("JAPAN", "TEST", None, "password")
+    parser = argparse.ArgumentParser(description='SGrid System')
+    parser.add_argument("region", help="Set region of node", type=str)
+    parser.add_argument("name", help="Set name of server", type=str)
+    parser.add_argument("master_key", help="Set master key of node.", type=str)
+    parser.add_argument("--tag", help="Set tag of node.", type=str)
+    args = vars(parser.parse_args())
+    grid = SGridV3Node(args["region"], args["name"], args["tag"], args["master_key"])
