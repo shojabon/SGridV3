@@ -18,6 +18,7 @@ class SGridV3MasterAPI:
     def __post_data(self, url: str, payload: dict):
         try:
             response = requests.post(url, json=payload)
+            print(response.text)
             if response.status_code != 200:
                 return None
             data = json.loads(response.text)
@@ -203,7 +204,8 @@ class SGridV3MasterAPI:
         return response["body"]
 
 if __name__ == '__main__':
-    grid = SGridV3MasterAPI("password", "http://127.0.0.1:2500/")
+    grid = SGridV3MasterAPI("cOZUTx#k[x2-G6]1", "http://45.32.15.160:2500/")
+    print(grid.node_list())
     #print(grid.ftp_user_add("TEST", "asdasda", "asdaasd", 10))
     #print(grid.ftp_user_remove("TEST", "asdasda"))
     #print(grid.container_run("TEST", "ubuntu:18.04", {"name": "test", "remove": True, "tty": True, "detach": True}))
