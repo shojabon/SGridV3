@@ -29,5 +29,5 @@ class NodeEndpoint:
 
                 return JSONResponse({"body": result, "code": "Success"}, 200)
             except Exception:
-                print(traceback.format_exc())
+                traceback.format_exc()
                 return JSONResponse({"body": "Internal Error", "code": "error.internal"}, 500)

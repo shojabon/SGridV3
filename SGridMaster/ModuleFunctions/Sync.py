@@ -100,6 +100,7 @@ class SyncFunction:
             ftp.connect(host=self.core.tool_function.get_raw_address_node(node), port=21)
             ftp.encoding = "utf-8"
             ftp.login("sgrid-master-user", self.core.config["master_key"])
+            ftp.set_pasv(False)
 
             node_config = self.core.nodes[self.core.tool_function.get_node_address(node)]
             # Load Required Paths
