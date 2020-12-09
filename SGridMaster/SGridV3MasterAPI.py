@@ -82,7 +82,10 @@ class SGridV3MasterAPI:
         response = self.__post_data(self.api_endpoint + "/docker/container/list/", payload)
         if response is None:
             return None
-        return response["body"]
+        result = response["body"]
+        if name_only:
+            result = [str(x).replace("/", "") for x in result]
+        return result
 
     # Node Functions
     def node_list(self):
