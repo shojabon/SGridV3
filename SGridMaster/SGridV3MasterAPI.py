@@ -61,6 +61,18 @@ class SGridV3MasterAPI:
             return False
         return True
 
+    def container_exec(self, node: str, container: str, command: str):
+        payload = {
+            "master_key": self.master_key,
+            "node": node,
+            "container": container,
+            "command": command
+        }
+        response = self.__post_data(self.api_endpoint + "/docker/container/execute/", payload)
+        if response is None:
+            return False
+        return True
+
     def container_list(self, node: str, name_only=True):
         payload = {
             "master_key": self.master_key,
