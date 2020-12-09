@@ -133,8 +133,6 @@ class FileEndpoint:
                 result = sgrid.file_unzip(json["target"], json["destination"])
                 if not result:
                     return JSONResponse({"body": "Internal Error", "code": "error.internal"}, 500)
-                if json["user"] in self.dir_cache:
-                    del self.dir_cache[json["user"]]
                 return JSONResponse({"body": "", "code": "Success"}, 200)
             except Exception:
                 return JSONResponse({"body": "Internal Error", "code": "error.internal"}, 500)

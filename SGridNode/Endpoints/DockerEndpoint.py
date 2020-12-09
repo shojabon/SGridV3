@@ -123,3 +123,16 @@ class DockerEndpoint:
             except Exception:
                 return JSONResponse({"body": "Image Delete Error", "code": "error.internal"}, 500)
             return JSONResponse({"body": "", "code": "Success"}, 200)
+
+        @self.core.fast_api.route("/docker/container/execute", methods=["POST"])
+        async def container_exec(request: Request):
+            json = await request.json()
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "id", "command"]):
+                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+            if self.core.config["master_key"] != json["master_key"]:
+                return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
+            try:
+                result = self.core.docker.containers.get(json["id"]).exec_run(cmd=json["command"], tty=True)
+                return JSONResponse({"body": result.output.decode("utf-8"), "code": "Success"}, 200)
+            except Exception:
+                return JSONResponse({"body": traceback.format_exc(), "code": "error.internal"}, 500)

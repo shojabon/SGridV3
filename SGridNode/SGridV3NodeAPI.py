@@ -89,6 +89,17 @@ class SGridV3NodeAPI:
             return False
         return True
 
+    def container_exec(self, container_id: str, command: str):
+        payload = {
+            "master_key": self.master_key,
+            "id": container_id,
+            "command": command
+        }
+        response = self.__post_data(self.api_endpoint + "/docker/container/exec/", payload)
+        if response is None:
+            return None
+        return response["body"]
+
     # Images
 
     def image_list(self, all_images=False):
@@ -196,7 +207,7 @@ class SGridV3NodeAPI:
 
 
 if __name__ == '__main__':
-    api = SGridV3NodeAPI("password", "http://127.0.0.1:2000/")
+    api = SGridV3NodeAPI("cOZUTx#k[x2-G6]1", "http://45.32.15.160:2000/")
     # payload = {
     #     "tty": True,
     #     "detach": True,
@@ -204,4 +215,4 @@ if __name__ == '__main__':
     #     "remove": True
     # }
     #print(api.backup_load("sho", "1606417526"))
-    print(api.file_unzip("data_dir/sho-1606417526.zip", "data_dir/ftp_data/users/sho/"))
+    print(api.file_unzip("data_dir/sync/minecraft/versions/1.16.4.zip", "data_dir/ftp_data/user/3d9a14162e13cac8e14570e1f251a136/"))
