@@ -61,7 +61,7 @@ class SGridV3MasterAPI:
             return False
         return True
 
-    def container_exec(self, node: str, container: str, command: str):
+    def container_execute(self, node: str, container: str, command: str):
         payload = {
             "master_key": self.master_key,
             "node": node,
