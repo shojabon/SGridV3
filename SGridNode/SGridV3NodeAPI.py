@@ -95,7 +95,7 @@ class SGridV3NodeAPI:
             "id": container_id,
             "command": command
         }
-        response = self.__post_data(self.api_endpoint + "/docker/container/exec/", payload)
+        response = self.__post_data(self.api_endpoint + "/docker/container/execute/", payload)
         if response is None:
             return None
         return response["body"]
