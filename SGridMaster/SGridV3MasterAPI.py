@@ -112,7 +112,9 @@ class SGridV3MasterAPI:
         node_address = node_data["address"][7:]
         if node_address[-1] == "/":
             node_address = str(node_address[:-1]).split(":")[0]
-        return FTP(host=node_address, user="sgrid-master-user", passwd=self.master_key)
+        ftp = FTP(host=node_address, user="sgrid-master-user", passwd=self.master_key)
+        ftp.set_pasv(False)
+        return ftp
 
     # File Function
     def backup_list(self, user: str):
@@ -123,7 +125,10 @@ class SGridV3MasterAPI:
         response = self.__post_data(self.api_endpoint + "/file/backup/list", payload)
         if response is None:
             return None
-        return response["body"]
+        lis = response["body"]
+        if len(lis) == 1 and lis[0] == "":
+            return None
+        return lis
 
     def backup_save(self, node: str, user: str):
         payload = {

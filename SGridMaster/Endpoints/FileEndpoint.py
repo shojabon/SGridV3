@@ -1,4 +1,5 @@
 import traceback
+from datetime import datetime
 
 from starlette.responses import JSONResponse
 
@@ -12,6 +13,7 @@ class FileEndpoint:
         self.register_endpoints()
 
         self.dir_cache = {}
+        self.dir_time = {}
 
     def getFilteredFilenames(self, file_names):
         if len(file_names) == 0:
@@ -37,11 +39,12 @@ class FileEndpoint:
                 return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
             if self.core.config["master_key"] != json["master_key"]:
                 return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
-            if json["user"] in self.dir_cache.keys():
+            if json["user"] in self.dir_cache.keys() and json["user"] in self.dir_time.keys() and round(datetime.now().timestamp() - self.dir_time[json["user"]]) < 10:
                 return JSONResponse({"body": self.dir_cache[json["user"]], "code": "Success"}, 200)
             try:
                 result = [x[len("backup/" + str(json["user"])) + 1:] for x in self.getFilteredFilenames(["backup/" + str(json["user"])])]
                 self.dir_cache[json["user"]] = result
+                self.dir_time[json["user"]] = round(datetime.now().timestamp())
                 return JSONResponse({"body": result, "code": "Success"}, 200)
             except Exception:
                 return JSONResponse({"body": "Internal Error", "code": "error.internal"}, 500)
