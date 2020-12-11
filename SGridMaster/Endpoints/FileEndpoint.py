@@ -35,11 +35,11 @@ class FileEndpoint:
         @self.core.fast_api.route("/file/backup/list", methods=["POST"])
         async def backup_list(request: Request):
             json = await request.json()
-            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "user"]):
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "user", "cache"]):
                 return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
             if self.core.config["master_key"] != json["master_key"]:
                 return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
-            if json["user"] in self.dir_cache.keys() and json["user"] in self.dir_time.keys() and round(datetime.now().timestamp() - self.dir_time[json["user"]]) < 10:
+            if json["cache"] and json["user"] in self.dir_cache.keys() and json["user"] in self.dir_time.keys() and round(datetime.now().timestamp() - self.dir_time[json["user"]]) < 10:
                 return JSONResponse({"body": self.dir_cache[json["user"]], "code": "Success"}, 200)
             try:
                 result = [x[len("backup/" + str(json["user"])) + 1:] for x in self.getFilteredFilenames(["backup/" + str(json["user"])])]

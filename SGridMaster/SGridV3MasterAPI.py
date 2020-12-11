@@ -117,10 +117,11 @@ class SGridV3MasterAPI:
         return ftp
 
     # File Function
-    def backup_list(self, user: str):
+    def backup_list(self, user: str, cache: bool = True):
         payload = {
             "master_key": self.master_key,
-            "user": user
+            "user": user,
+            "cache": cache
         }
         response = self.__post_data(self.api_endpoint + "/file/backup/list", payload)
         if response is None:
