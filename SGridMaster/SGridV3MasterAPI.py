@@ -3,6 +3,7 @@ import traceback
 from ftplib import FTP
 
 import requests
+from API.SResponse import SResponse
 
 
 class SGridV3MasterAPI:
@@ -19,12 +20,10 @@ class SGridV3MasterAPI:
         try:
             response = requests.post(url, json=payload)
             if response.status_code != 200:
-                return None
-            data = json.loads(response.text)
-            return data
+                return SResponse("web.error")
+            return SResponse(error_code=None, body=json.loads(response.text))
         except Exception:
-            print(traceback.format_exc())
-            return None
+            return SResponse("internal.error")
 
     # Docker Functions
     def container_run(self, node: str, image: str, params: dict):
@@ -34,21 +33,14 @@ class SGridV3MasterAPI:
             "image": image,
         }
         payload.update(params)
-        response = self.__post_data(self.api_endpoint + "/docker/container/run/", payload)
-        if response is None:
-            return False
-        return True
-
+        return self.__post_data(self.api_endpoint + "/docker/container/run/", payload)
     def container_stop(self, node: str, container: str):
         payload = {
             "master_key": self.master_key,
             "node": node,
             "container": container
         }
-        response = self.__post_data(self.api_endpoint + "/docker/container/stop/", payload)
-        if response is None:
-            return False
-        return True
+        return self.__post_data(self.api_endpoint + "/docker/container/stop/", payload)
 
     def container_start(self, node: str, container: str):
         payload = {
@@ -56,10 +48,7 @@ class SGridV3MasterAPI:
             "node": node,
             "container": container
         }
-        response = self.__post_data(self.api_endpoint + "/docker/container/start/", payload)
-        if response is None:
-            return False
-        return True
+        return self.__post_data(self.api_endpoint + "/docker/container/start/", payload)
 
     def container_execute(self, node: str, container: str, command: str):
         payload = {
@@ -68,10 +57,7 @@ class SGridV3MasterAPI:
             "container": container,
             "command": command
         }
-        response = self.__post_data(self.api_endpoint + "/docker/container/execute/", payload)
-        if response is None:
-            return False
-        return True
+        return self.__post_data(self.api_endpoint + "/docker/container/execute/", payload)
 
     def container_list(self, node: str, name_only=True):
         payload = {
@@ -80,41 +66,42 @@ class SGridV3MasterAPI:
             "name_only": name_only
         }
         response = self.__post_data(self.api_endpoint + "/docker/container/list/", payload)
-        if response is None:
-            return None
-        result = response["body"]
+        if response.fail():
+            return response
+        result = response.body()
         if name_only:
             result = [str(x).replace("/", "") for x in result]
-        return result
+        return SResponse("success", result)
 
     # Node Functions
     def node_list(self):
         payload = {
             "master_key": self.master_key
         }
-        response = self.__post_data(self.api_endpoint + "/node/list/", payload)
-        if response is None:
-            return None
-        return response["body"]
+        return self.__post_data(self.api_endpoint + "/node/list/", payload)
 
     def is_node(self, node: str):
         if node in self.node_list_cache.keys():
-            return True
-        self.node_list_cache = self.node_list()
+            return SResponse("success")
+        node_list = self.node_list()
+        if node_list.fail():
+            return node_list
+        self.node_list_cache = node_list.body()
         if node in self.node_list_cache.keys():
-            return True
-        return False
+            return SResponse("success")
+        return SResponse("node.invalid")
 
     def get_node_ftp(self, node: str):
-        if not self.is_node(node):
-            return None
+        is_node = self.is_node(node)
+        if is_node.fail():
+            return is_node
         node_data = self.node_list_cache[node]
         node_address = node_data["address"][7:]
         if node_address[-1] == "/":
             node_address = str(node_address[:-1]).split(":")[0]
         ftp = FTP(host=node_address, user="sgrid-master-user", passwd=self.master_key)
         ftp.set_pasv(False)
-        return ftp
+        return SResponse("success", ftp)
 
     # File Function
     def backup_list(self, user: str, cache: bool = True):
@@ -124,12 +111,12 @@ class SGridV3MasterAPI:
             "cache": cache
         }
         response = self.__post_data(self.api_endpoint + "/file/backup/list", payload)
-        if response is None:
-            return None
-        lis = response["body"]
+        if response.fail():
+            return response
+        lis = response.body()["body"]
         if len(lis) == 1 and lis[0] == "":
-            return None
-        return lis
+            return SResponse("directory.empty", [])
+        return SResponse("success", lis)
 
     def backup_save(self, node: str, user: str):
         payload = {
@@ -137,10 +124,7 @@ class SGridV3MasterAPI:
             "user": user,
             "node": node
         }
-        response = self.__post_data(self.api_endpoint + "/file/backup/save", payload)
-        if response is None:
-            return False
-        return True
+        return self.__post_data(self.api_endpoint + "/file/backup/save", payload)
 
     def backup_load(self, node: str, user: str, key: str):
         payload = {
@@ -149,10 +133,7 @@ class SGridV3MasterAPI:
             "node": node,
             "key": key
         }
-        response = self.__post_data(self.api_endpoint + "/file/backup/load", payload)
-        if response is None:
-            return False
-        return True
+        return self.__post_data(self.api_endpoint + "/file/backup/load", payload)
 
     def backup_delete(self, user: str, key: str):
         payload = {
@@ -160,10 +141,7 @@ class SGridV3MasterAPI:
             "user": user,
             "key": key
         }
-        response = self.__post_data(self.api_endpoint + "/file/backup/delete", payload)
-        if response is None:
-            return False
-        return True
+        return self.__post_data(self.api_endpoint + "/file/backup/delete", payload)
 
     def nuke_user(self, node: str, user: str):
         payload = {
@@ -171,10 +149,7 @@ class SGridV3MasterAPI:
             "user": user,
             "node": node
         }
-        response = self.__post_data(self.api_endpoint + "/file/nuke", payload)
-        if response is None:
-            return False
-        return True
+        return self.__post_data(self.api_endpoint + "/file/nuke", payload)
 
     def file_unzip(self, node: str, target: str, destination: str):
         payload = {
@@ -183,10 +158,7 @@ class SGridV3MasterAPI:
             "target": target,
             "destination": destination
         }
-        response = self.__post_data(self.api_endpoint + "/file/unzip", payload)
-        if response is None:
-            return False
-        return True
+        return self.__post_data(self.api_endpoint + "/file/unzip", payload)
 
     # FTP User
 
@@ -198,10 +170,7 @@ class SGridV3MasterAPI:
             "password": password,
             "limit_mb": limit_mb
         }
-        response = self.__post_data(self.api_endpoint + "/ftp/user/add", payload)
-        if response is None:
-            return False
-        return True
+        return self.__post_data(self.api_endpoint + "/ftp/user/add", payload)
 
     def ftp_user_remove(self, node: str, user: str):
         payload = {
@@ -209,19 +178,13 @@ class SGridV3MasterAPI:
             "node": node,
             "user": user,
         }
-        response = self.__post_data(self.api_endpoint + "/ftp/user/remove", payload)
-        if response is None:
-            return False
-        return True
+        return self.__post_data(self.api_endpoint + "/ftp/user/remove", payload)
 
     def ftp_user_list(self):
         payload = {
             "master_key": self.master_key,
         }
-        response = self.__post_data(self.api_endpoint + "/ftp/user/list", payload)
-        if response is None:
-            return None
-        return response["body"]
+        return self.__post_data(self.api_endpoint + "/ftp/user/list", payload)
 
 if __name__ == '__main__':
     grid = SGridV3MasterAPI("cOZUTx#k[x2-G6]1", "http://45.32.15.160:2500/")

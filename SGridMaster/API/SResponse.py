@@ -8,6 +8,7 @@ class SResponse:
     def __init__(self, error_code: str = None, body=None):
         self.error_code = {
             "success": {"success": True},
+            "directory.empty": {"success": True, "body": "Directory Is Empty"},
             "email.confirm.updated": {"success": True, "body": "Email Confirmation Key Updated"},
             "account.invalid": {"body": "Account Is Invalid"},
             "application.invalid": {"body": "Application Is Invalid"},

@@ -8,6 +8,7 @@ class SResponse:
     def __init__(self, error_code: str = None, body=None):
         self.error_code = {
             "success": {"success": True},
+            "directory.empty": {"success": True, "body": "Directory Is Empty"},
             "email.confirm.updated": {"success": True, "body": "Email Confirmation Key Updated"},
             "account.invalid": {"body": "Account Is Invalid"},
             "application.invalid": {"body": "Application Is Invalid"},
@@ -25,7 +26,8 @@ class SResponse:
             "message.invalid": {"body": "Message Is Invalid"},
             "object.invalid": {"body": "Object Is Invalid"},
             "task.exists": {"body": "Task Already Exists"},
-
+            "node.invalid": {"body": "Node Is Invalid"},
+            "node.not.initialized": {"body": "Node Not Initialized"},
         }
         self.data = {"code": "unknown", "success": False}
         if error_code in self.error_code:
