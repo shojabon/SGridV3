@@ -2,6 +2,7 @@ import json
 import traceback
 
 import requests
+from API.SResponse import SResponse
 
 
 class SGridV3NodeAPI:
@@ -16,30 +17,23 @@ class SGridV3NodeAPI:
         try:
             response = requests.post(url, json=payload)
             if response.status_code != 200:
-                return None
-            data = json.loads(response.text)
-            return data
+                return SResponse("web.error")
+            return SResponse(error_code=None, body=json.loads(response.text))
         except Exception:
-            return None
+            return SResponse("internal.error")
 
     # Node functions
     def node_info(self):
         payload = {
             "master_key": self.master_key,
         }
-        response = self.__post_data(self.api_endpoint + "/node/info/", payload)
-        if response is None:
-            return None
-        return response["body"]
+        return self.__post_data(self.api_endpoint + "/node/info/", payload)
 
     def node_status(self):
         payload = {
             "master_key": self.master_key,
         }
-        response = self.__post_data(self.api_endpoint + "/node/status/", payload)
-        if response is None:
-            return None
-        return response["body"]
+        return self.__post_data(self.api_endpoint + "/node/status/", payload)
 
     # Docker function
     def container_list(self, all_containers=False, name_only=True):
@@ -48,46 +42,31 @@ class SGridV3NodeAPI:
             "all": all_containers,
             "name_only": name_only
         }
-        response = self.__post_data(self.api_endpoint + "/docker/container/list/", payload)
-        if response is None:
-            return None
-        return response["body"]
+        return self.__post_data(self.api_endpoint + "/docker/container/list/", payload)
 
     def container_stats(self):
         payload = {
             "master_key": self.master_key
         }
-        response = self.__post_data(self.api_endpoint + "/docker/container/stats/", payload)
-        if response is None:
-            return None
-        return response["body"]
+        return self.__post_data(self.api_endpoint + "/docker/container/stats/", payload)
 
     def container_run(self,  **kwargs):
         kwargs["master_key"] = self.master_key
-        response = self.__post_data(self.api_endpoint + "/docker/container/run/", kwargs)
-        if response is None:
-            return False
-        return True
+        return self.__post_data(self.api_endpoint + "/docker/container/run/", kwargs)
 
     def container_stop(self, container_id: str):
         payload = {
             "master_key": self.master_key,
             "id": container_id
         }
-        response = self.__post_data(self.api_endpoint + "/docker/container/stop/", payload)
-        if response is None:
-            return False
-        return True
+        return self.__post_data(self.api_endpoint + "/docker/container/stop/", payload)
 
     def container_start(self, container_id: str):
         payload = {
             "master_key": self.master_key,
             "id": container_id
         }
-        response = self.__post_data(self.api_endpoint + "/docker/container/start/", payload)
-        if response is None:
-            return False
-        return True
+        return self.__post_data(self.api_endpoint + "/docker/container/start/", payload)
 
     def container_exec(self, container_id: str, command: str):
         payload = {
@@ -95,10 +74,7 @@ class SGridV3NodeAPI:
             "id": container_id,
             "command": command
         }
-        response = self.__post_data(self.api_endpoint + "/docker/container/execute/", payload)
-        if response is None:
-            return None
-        return response["body"]
+        return self.__post_data(self.api_endpoint + "/docker/container/execute/", payload)
 
     # Images
 
@@ -107,39 +83,27 @@ class SGridV3NodeAPI:
             "master_key": self.master_key,
             "all": all_images
         }
-        response = self.__post_data(self.api_endpoint + "/docker/image/list/", payload)
-        if response is None:
-            return None
-        return response["body"]
+        return self.__post_data(self.api_endpoint + "/docker/image/list/", payload)
 
     def image_build(self):
         payload = {
             "master_key": self.master_key,
         }
-        response = self.__post_data(self.api_endpoint + "/docker/image/build/", payload)
-        if response is None:
-            return None
-        return response["body"]
+        return self.__post_data(self.api_endpoint + "/docker/image/build/", payload)
 
     def image_delete(self, image: str):
         payload = {
             "master_key": self.master_key,
             "image": image
         }
-        response = self.__post_data(self.api_endpoint + "/docker/image/delete/", payload)
-        if response is None:
-            return None
-        return response["body"]
+        return self.__post_data(self.api_endpoint + "/docker/image/delete/", payload)
 
     # Sync
     def sync_map(self):
         payload = {
             "master_key": self.master_key,
         }
-        response = self.__post_data(self.api_endpoint + "/sync/map/", payload)
-        if response is None:
-            return None
-        return response["body"]
+        return self.__post_data(self.api_endpoint + "/sync/map/", payload)
 
     # FTP
     def ftp_user_set(self, users: dict):
@@ -147,10 +111,7 @@ class SGridV3NodeAPI:
             "master_key": self.master_key,
             "users": users
         }
-        response = self.__post_data(self.api_endpoint + "/ftp/users/set/", payload)
-        if response is None:
-            return None
-        return response["body"]
+        return self.__post_data(self.api_endpoint + "/ftp/users/set/", payload)
 
     # File
     def file_settings_set(self, settings: dict):
@@ -158,20 +119,14 @@ class SGridV3NodeAPI:
             "master_key": self.master_key,
             "settings": settings
         }
-        response = self.__post_data(self.api_endpoint + "/file/setting/set/", payload)
-        if response is None:
-            return None
-        return response["body"]
+        return self.__post_data(self.api_endpoint + "/file/setting/set/", payload)
 
     def backup_save(self, user: str):
         payload = {
             "master_key": self.master_key,
             "user": user
         }
-        response = self.__post_data(self.api_endpoint + "/file/backup/save/", payload)
-        if response is None:
-            return False
-        return True
+        return self.__post_data(self.api_endpoint + "/file/backup/save/", payload)
 
     def backup_load(self, user: str, key: str):
         payload = {
@@ -179,20 +134,14 @@ class SGridV3NodeAPI:
             "user": user,
             "backup_key": key
         }
-        response = self.__post_data(self.api_endpoint + "/file/backup/load/", payload)
-        if response is None:
-            return False
-        return True
+        return self.__post_data(self.api_endpoint + "/file/backup/load/", payload)
 
     def nuke_user(self, user: str):
         payload = {
             "master_key": self.master_key,
             "user": user
         }
-        response = self.__post_data(self.api_endpoint + "/file/nuke/", payload)
-        if response is None:
-            return False
-        return True
+        return self.__post_data(self.api_endpoint + "/file/nuke/", payload)
 
     def file_unzip(self, target: str, destination: str):
         payload = {
@@ -200,19 +149,4 @@ class SGridV3NodeAPI:
             "target": target,
             "destination": destination
         }
-        response = self.__post_data(self.api_endpoint + "/file/unzip/", payload)
-        if response is None:
-            return False
-        return True
-
-
-if __name__ == '__main__':
-    api = SGridV3NodeAPI("cOZUTx#k[x2-G6]1", "http://45.32.15.160:2000/")
-    # payload = {
-    #     "tty": True,
-    #     "detach": True,
-    #     "name": "gridtest",
-    #     "remove": True
-    # }
-    #print(api.backup_load("sho", "1606417526"))
-    print(api.file_unzip("data_dir/sync/minecraft/versions/1.16.4.zip", "data_dir/ftp_data/user/3d9a14162e13cac8e14570e1f251a136/"))
+        return self.__post_data(self.api_endpoint + "/file/unzip/", payload)
