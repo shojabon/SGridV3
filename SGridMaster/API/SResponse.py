@@ -25,7 +25,8 @@ class SResponse:
             "message.invalid": {"body": "Message Is Invalid"},
             "object.invalid": {"body": "Object Is Invalid"},
             "task.exists": {"body": "Task Already Exists"},
-            "node.invalid": {"body": "Node Is Invalid"}
+            "node.invalid": {"body": "Node Is Invalid"},
+            "node.not.initialized": {"body": "Node Not Initialized"},
         }
         self.data = {"code": "unknown", "success": False}
         if error_code in self.error_code:

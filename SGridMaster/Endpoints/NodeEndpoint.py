@@ -1,5 +1,6 @@
 import traceback
 
+from API.SResponse import SResponse
 from starlette.responses import JSONResponse
 
 from MasterMain import SGridV3Master
@@ -16,9 +17,9 @@ class NodeEndpoint:
         async def node_list(request: Request):
             json = await request.json()
             if not self.core.tool_function.does_post_params_exist(json, ["master_key"]):
-                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+                return SResponse("params.lacking").web()
             if self.core.config["master_key"] != json["master_key"]:
-                return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
+                return SResponse("key.invalid").web()
             try:
                 result = {}
                 for node_address in self.core.nodes.keys():
@@ -27,6 +28,6 @@ class NodeEndpoint:
                     temp_dict["address"] = node_address
                     result[node_name] = temp_dict
 
-                return JSONResponse({"body": result, "code": "Success"}, 200)
+                return SResponse("success", result).web()
             except Exception:
-                return JSONResponse({"body": "Internal Error", "code": "error.internal"}, 500)
+                return SResponse("internal.error").web()
