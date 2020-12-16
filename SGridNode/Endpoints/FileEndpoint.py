@@ -4,6 +4,7 @@ import traceback
 from threading import Thread
 
 import boto3
+from API.SResponse import SResponse
 from starlette.responses import JSONResponse
 
 from SGridNode.NodeMain import SGridV3Node
@@ -23,30 +24,30 @@ class FileEndpoint:
         async def object_setting_set(request: Request):
             json = await request.json()
             if not self.core.tool_function.does_post_params_exist(json, ["master_key", "settings"]):
-                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+                return SResponse("params.lacking").web()
             if self.core.config["master_key"] != json["master_key"]:
-                return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
+                return SResponse("key.invalid").web()
             if type(json["settings"]) != dict:
-                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+                return SResponse("params.lacking").web()
             if self.core.object_storage_setting != json["settings"]:
                 self.core.object_storage_setting = json["settings"]
                 sess = boto3.Session(aws_access_key_id=json["settings"]["access_key"],
                                      aws_secret_access_key=json["settings"]["secret_access_key"])
                 self.core.boto = sess.client('s3', endpoint_url=json["settings"]["endpoint_url"])
-            return JSONResponse({"body": "", "code": "Success"}, 200)
+            return SResponse("success").web()
 
         @self.core.fast_api.route("/file/backup/save", methods=["POST"])
         async def backup_save(request: Request):
             json = await request.json()
             if not self.core.tool_function.does_post_params_exist(json, ["master_key", "user"]):
-                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+                return SResponse("params.lacking").web()
             if self.core.config["master_key"] != json["master_key"]:
-                return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
+                return SResponse("key.invalid").web()
             user = json["user"]
             if user in self.current_task:
-                return JSONResponse({"body": "Task Already Exists", "code": "error.internal"}, 500)
+                return SResponse("task.exists").web()
             if self.core.object_storage_setting == {} or self.core.boto is None:
-                return JSONResponse({"body": "Image Delete Error", "code": "error.internal"}, 500)
+                return SResponse("internal.error").web()
             try:
                 def func():
                     try:
@@ -70,21 +71,21 @@ class FileEndpoint:
             except Exception:
                 if user in self.current_task:
                     self.current_task.remove(user)
-                return JSONResponse({"body": "Internal Error", "code": "error.internal"}, 500)
-            return JSONResponse({"body": "", "code": "Success"}, 200)
+                return SResponse("internal.error").web()
+            return SResponse("success").web()
 
         @self.core.fast_api.route("/file/backup/load", methods=["POST"])
         async def backup_load(request: Request):
             json = await request.json()
             if not self.core.tool_function.does_post_params_exist(json, ["master_key", "user", "backup_key"]):
-                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+                return SResponse("params.lacking").web()
             if self.core.config["master_key"] != json["master_key"]:
-                return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
+                return SResponse("key.invalid").web()
             user = json["user"]
             if user in self.current_task:
-                return JSONResponse({"body": "Task Already Exists", "code": "error.internal"}, 500)
+                return SResponse("task.exists").web()
             if self.core.object_storage_setting == {} or self.core.boto is None:
-                return JSONResponse({"body": "Image Delete Error", "code": "error.internal"}, 500)
+                return SResponse("internal.error").web()
             try:
                 def func():
                     file_name = str(user) + "-" + str(json["backup_key"]) + ".zip"
@@ -107,22 +108,22 @@ class FileEndpoint:
             except Exception:
                 if user in self.current_task:
                     self.current_task.remove(user)
-                return JSONResponse({"body": "Internal Error", "code": "error.internal"}, 500)
-            return JSONResponse({"body": "", "code": "Success"}, 200)
+                return SResponse("internal.error").web()
+            return SResponse("success").web()
 
         @self.core.fast_api.route("/file/nuke/", methods=["POST"])
         async def nuke_user_data(request: Request):
             json = await request.json()
             if not self.core.tool_function.does_post_params_exist(json, ["master_key", "user"]):
-                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+                return SResponse("params.lacking").web()
             if self.core.config["master_key"] != json["master_key"]:
-                return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
+                return SResponse("key.invalid").web()
             user = json["user"]
             if user in self.current_task:
-                return JSONResponse({"body": "Task Already Exists", "code": "error.internal"}, 500)
+                return SResponse("task.exists").web()
             try:
                 if not os.path.exists("data_dir/ftp_data/users/" + str(user)):
-                    return JSONResponse({"body": "", "code": "Success"}, 200)
+                    return SResponse("success").web()
 
                 self.current_task.append(user)
                 shutil.rmtree("data_dir/ftp_data/users/" + str(user))
@@ -135,20 +136,20 @@ class FileEndpoint:
                 print(traceback.format_exc())
                 if user in self.current_task:
                     self.current_task.remove(user)
-                return JSONResponse({"body": "Internal Error", "code": "error.internal"}, 500)
-            return JSONResponse({"body": "", "code": "Success"}, 200)
+                return SResponse("internal.error").web()
+            return SResponse("success").web()
 
         @self.core.fast_api.route("/file/unzip/", methods=["POST"])
         async def file_unzip(request: Request):
             json = await request.json()
             if not self.core.tool_function.does_post_params_exist(json, ["master_key", "target", "destination"]):
-                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+                return SResponse("params.lacking").web()
             if self.core.config["master_key"] != json["master_key"]:
-                return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
+                return SResponse("key.invalid").web()
             try:
                 if not os.path.exists(json["target"]):
-                    return JSONResponse({"body": "Path Invalid", "code": "path.invalid"}, 401)
+                    return SResponse("params.lacking").web()
                 shutil.unpack_archive(json["target"], json["destination"])
             except Exception:
-                return JSONResponse({"body": "Internal Error", "code": "error.internal"}, 500)
-            return JSONResponse({"body": "", "code": "Success"}, 200)
+                return SResponse("internal.error").web()
+            return SResponse("success").web()

@@ -23,7 +23,8 @@ class SResponse:
             "web.error": {"body": "Web Connection Error"},
             "key.invalid": {"body": "Key Is Invalid"},
             "message.invalid": {"body": "Message Is Invalid"},
-            "object.invalid": {"body": "Object Is Invalid"}
+            "object.invalid": {"body": "Object Is Invalid"},
+            "task.exists": {"body": "Task Already Exists"},
 
         }
         self.data = {"code": "unknown", "success": False}
