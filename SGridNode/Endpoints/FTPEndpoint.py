@@ -1,5 +1,6 @@
 import traceback
 
+from API.SResponse import SResponse
 from starlette.responses import JSONResponse
 
 from SGridNode.NodeMain import SGridV3Node
@@ -17,13 +18,13 @@ class FTPClientEndpoint:
         async def ftp_user_set(request: Request):
             json = await request.json()
             if not self.core.tool_function.does_post_params_exist(json, ["master_key", "users"]):
-                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+                return SResponse("params.lacking").web()
             if self.core.config["master_key"] != json["master_key"]:
-                return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
+                return SResponse("key.invalid").web()
             if type(json["users"]) != dict:
-                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+                return SResponse("params.lacking").web()
 
             self.core.ftp_users = json["users"]
             self.core.ftp_function.load_users()
 
-            return JSONResponse({"body": "", "code": "Success"}, 200)
+            return SResponse("success").web()

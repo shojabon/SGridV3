@@ -1,4 +1,5 @@
 import psutil
+from API.SResponse import SResponse
 from starlette.responses import JSONResponse
 
 from SGridNode.NodeMain import SGridV3Node
@@ -15,9 +16,9 @@ class NodeEndpoint:
         async def node_info(request: Request):
             json = await request.json()
             if not self.core.tool_function.does_post_params_exist(json, ["master_key"]):
-                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+                return SResponse("params.lacking").web()
             if self.core.config["master_key"] != json["master_key"]:
-                return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
+                return SResponse("key.invalid").web()
             data = {
                 "node_id": self.core.config["node_id"],
                 "name": self.core.config["name"],
@@ -28,15 +29,15 @@ class NodeEndpoint:
                 "ram": round(psutil.virtual_memory().total / 1024 / 1024),
                 "swap": round(psutil.swap_memory().total / 1024 / 1024)
             }
-            return JSONResponse({"body": data, "code": "Success"}, 200)
+            return SResponse("success", data)
 
         @self.core.fast_api.route("/node/status/", methods=["POST"])
         async def node_status(request: Request):
             json = await request.json()
             if not self.core.tool_function.does_post_params_exist(json, ["master_key"]):
-                return JSONResponse({"body": "Not Enough Params", "code": "params.not_enough"}, 400)
+                return SResponse("params.lacking").web()
             if self.core.config["master_key"] != json["master_key"]:
-                return JSONResponse({"body": "Credentials Invalid", "code": "credentials.invalid"}, 401)
+                return SResponse("key.invalid").web()
             net_usage, disk_usage, cpu_usage = self.core.tool_function.net_usage(), self.core.tool_function.disk_usage(), psutil.cpu_percent(interval=1, percpu=True)
             data = {
                 "cpu_usage": cpu_usage,
@@ -46,4 +47,4 @@ class NodeEndpoint:
                 "net_usage": net_usage,
                 "disk_usage": disk_usage
             }
-            return JSONResponse({"body": data, "code": "Success"}, 200)
+            return SResponse("success", data)
