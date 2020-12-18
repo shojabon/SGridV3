@@ -68,7 +68,8 @@ class FTPFunction:
         os.makedirs("data_dir/ftp_data/backup", exist_ok=True)
 
         t = threading.Thread(target=self.ftp_server.serve_forever)
-        t.start()
+        self.thread = t
+        self.thread.start()
 
     def load_users(self):
         for user in self.core.ftp_users.keys():

@@ -24,8 +24,7 @@ class SGridV3Node:
         from SGridNode.ModuleFunctions.Tool import ToolFunction
         self.tool_function = ToolFunction(self)
 
-        self.config = {}
-        self.load_config("config.json")
+        self.config = self.load_config("config.json")
         if "node_id" not in self.config.keys():
             self.config["node_id"] = self.tool_function.create_id_hash(self.tool_function.create_session_key(128))
         self.config["region"] = region
@@ -35,20 +34,9 @@ class SGridV3Node:
         self.save_config(self.config, "config.json")
         self.ftp_users = {}
 
-
-
-        self.object_storage_setting = {
-            "access_key": "OFYJ3DMC54YH413KF35U",
-            "bucket": "testdevbucket",
-            "endpoint_url": "https://ewr1.vultrobjects.com",
-            "secret_access_key": "7hoGXQfsCNnvHqC3x1sUxRF6kNkT181xCivg13nd"
-        }
-
-        self.boto = None
-
-        sess = boto3.Session(aws_access_key_id=self.object_storage_setting["access_key"],
-                             aws_secret_access_key=self.object_storage_setting["secret_access_key"])
-        self.boto = sess.client('s3', endpoint_url=self.object_storage_setting["endpoint_url"])
+        sess = boto3.Session(aws_access_key_id=self.config["object_storage_info"]["access_key"],
+                             aws_secret_access_key=self.config["object_storage_info"]["secret_access_key"])
+        self.boto = sess.client('s3', endpoint_url=self.config["object_storage_info"]["endpoint_url"])
 
         from SGridNode.ModuleFunctions.Docker import DockerFunction
         self.docker_function = DockerFunction(self)
@@ -77,6 +65,7 @@ class SGridV3Node:
         self.file_function.clear_backup()
 
         uvicorn.run(self.fast_api, host="0.0.0.0", port=2000)
+        self.ftp_function.ftp_server.close()
 
     def load_config(self, file: str):
         if not os.path.exists(file):

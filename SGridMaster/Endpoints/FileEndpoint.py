@@ -41,7 +41,7 @@ class FileEndpoint:
             if self.core.config["master_key"] != json["master_key"]:
                 return SResponse("key.invalid").web()
             if json["cache"] and json["user"] in self.dir_cache.keys() and json["user"] in self.dir_time.keys() and round(datetime.now().timestamp() - self.dir_time[json["user"]]) < 10:
-                return SResponse("success", self.dir_cache[json["user"]])
+                return SResponse("success", self.dir_cache[json["user"]]).web()
             try:
                 result = [x[len("backup/" + str(json["user"])) + 1:] for x in self.getFilteredFilenames(["backup/" + str(json["user"])])]
                 self.dir_cache[json["user"]] = result

@@ -66,16 +66,18 @@ class NodeFunction:
                 if grid is None:
                     return
                 result = grid.node_status()
-                if result is None:
+                if result.fail():
                     return
+                result = result.body()
                 result["date_time"] = datetime.now()
                 self.status_cache[name] = result
                 result["node"] = name
                 self.core.mongo.insert_data("SGRID_node_stats", result)
 
                 result = grid.container_stats()
-                if result is None:
+                if result.fail():
                     return
+                result = result.body()
                 for container in result:
                     container["date_time"] = datetime.now()
                     container["node"] = name

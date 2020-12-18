@@ -34,6 +34,7 @@ class SGridV3MasterAPI:
         }
         payload.update(params)
         return self.__post_data(self.api_endpoint + "/docker/container/run/", payload)
+
     def container_stop(self, node: str, container: str):
         payload = {
             "master_key": self.master_key,
@@ -113,7 +114,7 @@ class SGridV3MasterAPI:
         response = self.__post_data(self.api_endpoint + "/file/backup/list", payload)
         if response.fail():
             return response
-        lis = response.body()["body"]
+        lis = response.body()
         if len(lis) == 1 and lis[0] == "":
             return SResponse("directory.empty", [])
         return SResponse("success", lis)

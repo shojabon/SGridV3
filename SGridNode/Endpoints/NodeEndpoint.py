@@ -29,7 +29,7 @@ class NodeEndpoint:
                 "ram": round(psutil.virtual_memory().total / 1024 / 1024),
                 "swap": round(psutil.swap_memory().total / 1024 / 1024)
             }
-            return SResponse("success", data)
+            return SResponse("success", data).web()
 
         @self.core.fast_api.route("/node/status/", methods=["POST"])
         async def node_status(request: Request):
@@ -47,4 +47,4 @@ class NodeEndpoint:
                 "net_usage": net_usage,
                 "disk_usage": disk_usage
             }
-            return SResponse("success", data)
+            return SResponse("success", data).web()
