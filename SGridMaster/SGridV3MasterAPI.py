@@ -113,13 +113,7 @@ class SGridV3MasterAPI:
             "cache": cache,
             "full": full
         }
-        response = self.__post_data(self.api_endpoint + "/file/backup/list", payload)
-        if response.fail():
-            return response
-        lis = response.body()
-        if len(lis) == 1 and lis[0] == "":
-            return SResponse("directory.empty", [])
-        return SResponse("success", lis)
+        return self.__post_data(self.api_endpoint + "/file/backup/list", payload)
 
     def backup_final(self, node: str, user: str):
         payload = {

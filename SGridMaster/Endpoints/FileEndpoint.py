@@ -55,6 +55,7 @@ class FileEndpoint:
                                                    ["backup/" + str(json["user"])]):
                     if x == "backup/" + str(json["user"]):
                         continue
+                    x["LastModified"] = x["LastModified"].timestamp()
                     result.append(x)
 
                 self.dir_cache[json["user"]] = result
