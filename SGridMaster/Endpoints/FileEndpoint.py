@@ -16,20 +16,22 @@ class FileEndpoint:
         self.dir_cache = {}
         self.dir_time = {}
 
-    def getFilteredFilenames(self, file_names):
+    def getFilteredFilenames(self, bucket_name, file_names):
         if len(file_names) == 0:
             start = ''
         else:
-            start = file_names[-1]
+            start = file_names[-1]["Key"]
 
         response = self.core.boto.list_objects_v2(
-            Bucket="testdevbucket",
+            Bucket=bucket_name,
             Prefix=start
         )
         if 'Contents' in response:
-            file_names = [content['Key'] for content in response['Contents']]
+            file_names = response["Contents"]
             if 'IsTruncated' in response and response["IsTruncated"]:
-                return self.getFilteredFilenames(file_names)
+                response = self.getFilteredFilenames(bucket_name, response)
+                [file_names.append(x) for x in response]
+                return file_names
         return file_names
 
     def register_endpoints(self):
@@ -43,7 +45,7 @@ class FileEndpoint:
             if json["cache"] and json["user"] in self.dir_cache.keys() and json["user"] in self.dir_time.keys() and round(datetime.now().timestamp() - self.dir_time[json["user"]]) < 10:
                 return SResponse("success", self.dir_cache[json["user"]]).web()
             try:
-                result = [x[len("backup/" + str(json["user"])) + 1:] for x in self.getFilteredFilenames(["backup/" + str(json["user"])])]
+                result = [x["Key"][len("backup/" + str(json["user"])) + 1:] for x in self.getFilteredFilenames(self.core.config["object_storage_info"]["bucket"], ["backup/" + str(json["user"])])]
                 self.dir_cache[json["user"]] = result
                 self.dir_time[json["user"]] = round(datetime.now().timestamp())
                 return SResponse("success", result).web()

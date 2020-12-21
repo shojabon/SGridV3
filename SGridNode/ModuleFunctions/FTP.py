@@ -62,8 +62,7 @@ class FTPFunction:
         self.handler.authorizer = self.authorizer
         self.ftp_server = FTPServer(("0.0.0.0", 21), self.handler)
         self.ftp_server.max_cons = 300
-        self.ftp_server.max_cons_per_ip = 3
-
+        self.ftp_server.max_cons_per_ip = 5
 
         os.makedirs("data_dir/ftp_data/backup", exist_ok=True)
 
