@@ -149,7 +149,7 @@ class FileEndpoint:
             if self.core.config["master_key"] != json["master_key"]:
                 return SResponse("key.invalid").web()
             try:
-                self.core.boto.delete_object(Bucket=self.core.config["object_storage_info"]["bucket"], Key="backup/" + str(json["user"]) + "/" + str(json["user"]) + "-" + str(json["key"]) + ".zip")
+                self.core.boto.delete_object(Bucket=self.core.config["object_storage_info"]["bucket"], Key="backup/" + str(json["user"]) + "/" + str(json["key"]) + ".zip")
                 if json["user"] in self.dir_cache:
                     del self.dir_cache[json["user"]]
                 return SResponse("success").web()
