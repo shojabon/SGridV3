@@ -42,7 +42,6 @@ class FileEndpoint:
                 return SResponse("params.lacking").web()
             if self.core.config["master_key"] != json["master_key"]:
                 return SResponse("key.invalid").web()
-            user = json["user"]
             if self.core.config["object_storage_info"] == {} or self.core.boto is None:
                 return SResponse("internal.error").web()
             try:
@@ -51,7 +50,7 @@ class FileEndpoint:
                         res = self.core.file_function.backup_user_data(json["user"])
                         if res is None:
                             return
-                        self.core.boto.upload_file(res, self.core.config["object_storage_info"]["bucket"], "final-upload/" + res.split("/")[:len(user)])
+                        self.core.boto.upload_file(res, self.core.config["object_storage_info"]["bucket"], "final-upload/" + str(json["user"]) + ".zip")
                         if os.path.exists('data_dir/ftp_data/backup/' + res.split("/")[-1]):
                             os.remove('data_dir/ftp_data/backup/' + res.split("/")[-1])
                     except Exception:

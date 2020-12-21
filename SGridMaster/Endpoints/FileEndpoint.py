@@ -8,6 +8,7 @@ from starlette.responses import JSONResponse
 from MasterMain import SGridV3Master
 from fastapi import Request
 
+
 class FileEndpoint:
 
     def __init__(self, core: SGridV3Master):
@@ -39,6 +40,27 @@ class FileEndpoint:
         return file_names
 
     def register_endpoints(self):
+
+        @self.core.fast_api.route("/file/backup/final/list", methods=["POST"])
+        async def backup_final_list(request: Request):
+            json = await request.json()
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key"]):
+                return SResponse("params.lacking").web()
+            if self.core.config["master_key"] != json["master_key"]:
+                return SResponse("key.invalid").web()
+            try:
+                result = []
+                for x in self.getFilteredFilenames(self.core.config["object_storage_info"]["bucket"],
+                                                   ["final-upload/"]):
+                    if x == "final-upload/":
+                        continue
+                    x["LastModified"] = x["LastModified"].timestamp()
+                    result.append(x)
+
+                return SResponse("success", result).web()
+            except Exception:
+                return SResponse("internal.error").web()
+
         @self.core.fast_api.route("/file/backup/list", methods=["POST"])
         async def backup_list(request: Request):
             json = await request.json()
@@ -48,7 +70,9 @@ class FileEndpoint:
                 return SResponse("params.lacking").web()
             if self.core.config["master_key"] != json["master_key"]:
                 return SResponse("key.invalid").web()
-            if json["cache"] and json["user"] in self.dir_cache.keys() and json["user"] in self.dir_time.keys() and round(datetime.now().timestamp() - self.dir_time[json["user"]]) < 10:
+            if json["cache"] and json["user"] in self.dir_cache.keys() and json[
+                "user"] in self.dir_time.keys() and round(
+                    datetime.now().timestamp() - self.dir_time[json["user"]]) < 10:
                 return SResponse("success", self.dir_cache[json["user"]]).web()
             try:
                 result = []
@@ -149,7 +173,8 @@ class FileEndpoint:
             if self.core.config["master_key"] != json["master_key"]:
                 return SResponse("key.invalid").web()
             try:
-                self.core.boto.delete_object(Bucket=self.core.config["object_storage_info"]["bucket"], Key="backup/" + str(json["user"]) + "/" + str(json["key"]) + ".zip")
+                self.core.boto.delete_object(Bucket=self.core.config["object_storage_info"]["bucket"],
+                                             Key="backup/" + str(json["user"]) + "/" + str(json["key"]) + ".zip")
                 if json["user"] in self.dir_cache:
                     del self.dir_cache[json["user"]]
                 return SResponse("success").web()
@@ -179,9 +204,13 @@ class FileEndpoint:
                 name = slugify(json["new_key"])
                 if len(name) > 32:
                     return SResponse("name.toolong").web()
-                copy_source = {'Bucket': self.core.config["object_storage_info"]["bucket"], 'Key': "backup/" + str(json["user"]) + "/" + str(json["key"]) + ".zip"}
-                self.core.boto.copy_object(CopySource=copy_source, Bucket=self.core.config["object_storage_info"]["bucket"], Key="backup/" + str(json["user"]) + "/" + str(name) + ".zip")
-                self.core.boto.delete_object(Bucket=self.core.config["object_storage_info"]["bucket"], Key="backup/" + str(json["user"]) + "/" + str(json["key"]) + ".zip")
+                copy_source = {'Bucket': self.core.config["object_storage_info"]["bucket"],
+                               'Key': "backup/" + str(json["user"]) + "/" + str(json["key"]) + ".zip"}
+                self.core.boto.copy_object(CopySource=copy_source,
+                                           Bucket=self.core.config["object_storage_info"]["bucket"],
+                                           Key="backup/" + str(json["user"]) + "/" + str(name) + ".zip")
+                self.core.boto.delete_object(Bucket=self.core.config["object_storage_info"]["bucket"],
+                                             Key="backup/" + str(json["user"]) + "/" + str(json["key"]) + ".zip")
                 if json["user"] in self.dir_cache:
                     del self.dir_cache[json["user"]]
             except Exception:
@@ -193,7 +222,8 @@ class FileEndpoint:
         @self.core.fast_api.route("/file/unzip", methods=["POST"])
         async def file_unzip(request: Request):
             json = await request.json()
-            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "node", "target", "destination"]):
+            if not self.core.tool_function.does_post_params_exist(json,
+                                                                  ["master_key", "node", "target", "destination"]):
                 return SResponse("params.lacking").web()
             if self.core.config["master_key"] != json["master_key"]:
                 return SResponse("key.invalid").web()

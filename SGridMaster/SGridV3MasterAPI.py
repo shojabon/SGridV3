@@ -106,6 +106,13 @@ class SGridV3MasterAPI:
         return SResponse("success", ftp)
 
     # File Function
+
+    def backup_final_list(self):
+        payload = {
+            "master_key": self.master_key,
+        }
+        return self.__post_data(self.api_endpoint + "/file/backup/final/list", payload)
+
     def backup_list(self, user: str, cache: bool = True, full: bool = False):
         payload = {
             "master_key": self.master_key,
