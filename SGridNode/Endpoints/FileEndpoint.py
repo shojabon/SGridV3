@@ -39,25 +39,29 @@ class FileEndpoint:
         @self.core.fast_api.route("/file/backup/save", methods=["POST"])
         async def backup_save(request: Request):
             json = await request.json()
-            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "user"]):
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "user", "key"]):
                 return SResponse("params.lacking").web()
             if self.core.config["master_key"] != json["master_key"]:
                 return SResponse("key.invalid").web()
             user = json["user"]
             if user in self.current_task:
                 return SResponse("task.exists").web()
-            if self.core.object_storage_setting == {} or self.core.boto is None:
+            if self.core.config["object_storage_info"] == {} or self.core.boto is None:
                 return SResponse("internal.error").web()
+            key = str(json["key"]).replace(" ", "-")
+            if len(key) > 32:
+                return SResponse("name.toolong").web()
+            if key == "":
+                key = None
             try:
                 def func():
                     try:
-                        res = self.core.file_function.backup_user_data(json["user"])
+                        res = self.core.file_function.backup_user_data(json["user"], key)
                         if res is None:
                             if user in self.current_task:
                                 self.current_task.remove(user)
                             return
-                        self.core.boto.upload_file(res, self.core.object_storage_setting["bucket"],
-                                                   "backup/" + str(user) + "/" + res.split("/")[-1])
+                        self.core.boto.upload_file(res, self.core.config["object_storage_info"]["bucket"], "backup/" + str(user) + "/" + res.split("/")[len(user) + 1:])
                         if os.path.exists('data_dir/ftp_data/backup/' + res.split("/")[-1]):
                             os.remove('data_dir/ftp_data/backup/' + res.split("/")[-1])
                         if user in self.current_task:
@@ -67,12 +71,11 @@ class FileEndpoint:
 
                 self.current_task.append(user)
                 Thread(target=func).start()
-
+                return SResponse("success").web()
             except Exception:
                 if user in self.current_task:
                     self.current_task.remove(user)
                 return SResponse("internal.error").web()
-            return SResponse("success").web()
 
         @self.core.fast_api.route("/file/backup/load", methods=["POST"])
         async def backup_load(request: Request):
@@ -84,14 +87,17 @@ class FileEndpoint:
             user = json["user"]
             if user in self.current_task:
                 return SResponse("task.exists").web()
-            if self.core.object_storage_setting == {} or self.core.boto is None:
+            if self.core.config["object_storage_info"] == {} or self.core.boto is None:
                 return SResponse("internal.error").web()
+            if len(json["backup_key"]) > 32:
+                return SResponse("name.toolong").web()
+            backup_key = str(json["backup_key"]).replace(" ", "-")
             try:
                 def func():
-                    file_name = str(user) + "-" + str(json["backup_key"]) + ".zip"
+                    file_name = backup_key + ".zip"
                     try:
-                        self.core.boto.download_file(self.core.object_storage_setting["bucket"], "backup/" + str(user) + "/" + file_name, "data_dir/ftp_data/backup/" + file_name)
-                        self.core.file_function.unpack_user_data(str(user), str(json["backup_key"]))
+                        self.core.boto.download_file(self.core.config["object_storage_info"], "backup/" + str(user) + "/" + file_name, "data_dir/ftp_data/backup/" + file_name)
+                        self.core.file_function.unpack_user_data(str(user), file_name)
                         if os.path.exists('data_dir/ftp_data/backup/' + file_name):
                             os.remove('data_dir/ftp_data/backup/' + file_name)
                         if user in self.current_task:
@@ -104,12 +110,11 @@ class FileEndpoint:
 
                 self.current_task.append(user)
                 Thread(target=func).start()
-
+                return SResponse("success").web()
             except Exception:
                 if user in self.current_task:
                     self.current_task.remove(user)
                 return SResponse("internal.error").web()
-            return SResponse("success").web()
 
         @self.core.fast_api.route("/file/nuke/", methods=["POST"])
         async def nuke_user_data(request: Request):

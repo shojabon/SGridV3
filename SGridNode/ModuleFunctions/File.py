@@ -20,22 +20,24 @@ class FileFunction:
     def __init__(self, core: SGridV3Node):
         self.core = core
 
-    def backup_user_data(self, user: str):
+    def backup_user_data(self, user: str, key: str = str(round(datetime.now().timestamp()))):
         if not os.path.exists('data_dir/ftp_data/users/' + str(user)):
             return None
+        if key is None:
+            key = str(round(datetime.now().timestamp()))
         try:
-            return shutil.make_archive('data_dir/ftp_data/backup/' + str(user) + "-" + str(round(datetime.now().timestamp())),
+            return shutil.make_archive('data_dir/ftp_data/backup/' + str(user) + "-" + str(key),
                                 'zip', root_dir='data_dir/ftp_data/users/' + str(user)).replace("\\", "/")
         except Exception:
             return None
 
-    def unpack_user_data(self, user: str, key: str):
-        if not os.path.exists('data_dir/ftp_data/backup/' + str(user) + "-" + str(key) + ".zip"):
+    def unpack_user_data(self, user: str, file_name: str):
+        if not os.path.exists('data_dir/ftp_data/backup/' + str(file_name)):
             return False
         try:
             if os.path.exists("data_dir/ftp_data/users/" + str(user)):
                 shutil.rmtree("data_dir/ftp_data/users/" + str(user))
-            shutil.unpack_archive('data_dir/ftp_data/backup/' + str(user) + "-" + str(key) + ".zip",
+            shutil.unpack_archive('data_dir/ftp_data/backup/' + str(file_name),
                                   "data_dir/ftp_data/users/" + str(user))
             return True
         except Exception:
