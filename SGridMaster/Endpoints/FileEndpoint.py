@@ -55,13 +55,16 @@ class FileEndpoint:
                                                    ["backup/" + str(json["user"])]):
                     if x == "backup/" + str(json["user"]):
                         continue
-                    if json["full"]:
-                        result.append(x)
-                    else:
-                        result.append(x["Key"][len("backup/" + str(json["user"])) + 1:])
+                    result.append(x)
+
                 self.dir_cache[json["user"]] = result
                 self.dir_time[json["user"]] = round(datetime.now().timestamp())
-                return SResponse("success", result).web()
+
+                if json["full"]:
+                    return SResponse("success", result).web()
+                else:
+                    return SResponse("success",
+                                     [x["Key"][len("backup/" + str(json["user"])) + 1:] for x in result]).web()
             except Exception:
                 print(traceback.format_exc())
                 return SResponse("internal.error").web()
