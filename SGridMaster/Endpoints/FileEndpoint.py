@@ -20,7 +20,10 @@ class FileEndpoint:
         if len(file_names) == 0:
             start = ''
         else:
-            start = file_names[-1]["Key"]
+            if type(file_names[-1]) == dict:
+                start = file_names[-1]["Key"]
+            else:
+                start = file_names[-1]
 
         response = self.core.boto.list_objects_v2(
             Bucket=bucket_name,
@@ -45,11 +48,17 @@ class FileEndpoint:
             if json["cache"] and json["user"] in self.dir_cache.keys() and json["user"] in self.dir_time.keys() and round(datetime.now().timestamp() - self.dir_time[json["user"]]) < 10:
                 return SResponse("success", self.dir_cache[json["user"]]).web()
             try:
-                result = [x["Key"][len("backup/" + str(json["user"])) + 1:] for x in self.getFilteredFilenames(self.core.config["object_storage_info"]["bucket"], ["backup/" + str(json["user"])])]
+                result = []
+                for x in self.getFilteredFilenames(self.core.config["object_storage_info"]["bucket"],
+                                                   ["backup/" + str(json["user"])]):
+                    if x == "backup/" + str(json["user"]):
+                        continue
+                    result.append(x["Key"][len("backup/" + str(json["user"])) + 1:])
                 self.dir_cache[json["user"]] = result
                 self.dir_time[json["user"]] = round(datetime.now().timestamp())
                 return SResponse("success", result).web()
             except Exception:
+                print(traceback.format_exc())
                 return SResponse("internal.error").web()
 
         @self.core.fast_api.route("/file/backup/final", methods=["POST"])

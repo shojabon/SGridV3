@@ -5,6 +5,7 @@ from threading import Thread
 
 import boto3
 from API.SResponse import SResponse
+from slugify import slugify
 from starlette.responses import JSONResponse
 
 from SGridNode.NodeMain import SGridV3Node
@@ -29,8 +30,8 @@ class FileEndpoint:
                 return SResponse("key.invalid").web()
             if type(json["settings"]) != dict:
                 return SResponse("params.lacking").web()
-            if self.core.object_storage_setting != json["settings"]:
-                self.core.object_storage_setting = json["settings"]
+            if self.core.config["object_storage_info"] != json["settings"]:
+                self.core.config["object_storage_info"] = json["settings"]
                 sess = boto3.Session(aws_access_key_id=json["settings"]["access_key"],
                                      aws_secret_access_key=json["settings"]["secret_access_key"])
                 self.core.boto = sess.client('s3', endpoint_url=json["settings"]["endpoint_url"])
@@ -74,7 +75,7 @@ class FileEndpoint:
                 return SResponse("task.exists").web()
             if self.core.config["object_storage_info"] == {} or self.core.boto is None:
                 return SResponse("internal.error").web()
-            key = str(json["key"]).replace(" ", "-")
+            key = slugify(json["key"])
             if len(key) > 32:
                 return SResponse("name.toolong").web()
             if key == "":
@@ -87,7 +88,7 @@ class FileEndpoint:
                             if user in self.current_task:
                                 self.current_task.remove(user)
                             return
-                        self.core.boto.upload_file(res, self.core.config["object_storage_info"]["bucket"], "backup/" + str(user) + "/" + res.split("/")[len(user) + 1:])
+                        self.core.boto.upload_file(res, self.core.config["object_storage_info"]["bucket"], "backup/" + str(user) + "/" + res.split("/")[-1][len(user) + 1:])
                         if os.path.exists('data_dir/ftp_data/backup/' + res.split("/")[-1]):
                             os.remove('data_dir/ftp_data/backup/' + res.split("/")[-1])
                         if user in self.current_task:
