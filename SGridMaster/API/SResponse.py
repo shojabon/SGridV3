@@ -57,6 +57,7 @@ class SResponse:
             "name.exists": {"body": "Name Exists"},
             "port.error": {"body": "Port Error"},
             "backup.exceeded": {"body": "Number Of Backups Exceeded"},
+            "backup.invalid": {"body": "Backup Is Invalid"},
             "version.invalid": {"body": "Version Is Invalid"},
             "path.invalid": {"body": "Path Is Invalid"},
             "task.invalid": {"body": "Task Invalid"},

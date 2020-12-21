@@ -174,6 +174,16 @@ class SGridV3MasterAPI:
         }
         return self.__post_data(self.api_endpoint + "/file/backup/status", payload)
 
+    def backup_get_download_link(self, user: str, key: str, expire: int = 3):
+        payload = {
+            "master_key": self.master_key,
+            "user": user,
+            "key": key,
+            "expire": expire
+        }
+        return self.__post_data(self.api_endpoint + "/file/backup/download", payload)
+
+
     def nuke_user(self, node: str, user: str):
         payload = {
             "master_key": self.master_key,
