@@ -6,11 +6,9 @@ from threading import Thread
 import boto3
 from API.SResponse import SResponse
 from slugify import slugify
-from starlette.responses import JSONResponse
 
 from SGridNode.NodeMain import SGridV3Node
 from fastapi import Request
-import json as json_class
 
 
 class FileEndpoint:
@@ -118,12 +116,12 @@ class FileEndpoint:
                 return SResponse("internal.error").web()
             if len(json["backup_key"]) > 32:
                 return SResponse("name.toolong").web()
-            backup_key = str(json["backup_key"]).replace(" ", "-")
+            backup_key = slugify(json["backup_key"])
             try:
                 def func():
-                    file_name = backup_key + ".zip"
+                    file_name = str(backup_key) + ".zip"
                     try:
-                        self.core.boto.download_file(self.core.config["object_storage_info"], "backup/" + str(user) + "/" + file_name, "data_dir/ftp_data/backup/" + file_name)
+                        self.core.boto.download_file(self.core.config["object_storage_info"]["bucket"], "backup/" + str(user) + "/" + str(file_name), "data_dir/ftp_data/backup/" + str(file_name))
                         self.core.file_function.unpack_user_data(str(user), file_name)
                         if os.path.exists('data_dir/ftp_data/backup/' + file_name):
                             os.remove('data_dir/ftp_data/backup/' + file_name)
@@ -163,13 +161,12 @@ class FileEndpoint:
 
                 if user in self.current_task:
                     self.current_task.remove(user)
-
+                return SResponse("success").web()
             except Exception:
                 print(traceback.format_exc())
                 if user in self.current_task:
                     self.current_task.remove(user)
                 return SResponse("internal.error").web()
-            return SResponse("success").web()
 
         @self.core.fast_api.route("/file/unzip/", methods=["POST"])
         async def file_unzip(request: Request):

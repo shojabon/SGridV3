@@ -67,7 +67,6 @@ class FileEndpoint:
                     return SResponse("success",
                                      [x["Key"][len("backup/" + str(json["user"])) + 1:] for x in result]).web()
             except Exception:
-                print(traceback.format_exc())
                 return SResponse("internal.error").web()
 
         @self.core.fast_api.route("/file/backup/final", methods=["POST"])
