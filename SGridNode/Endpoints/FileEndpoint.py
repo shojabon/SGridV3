@@ -36,6 +36,32 @@ class FileEndpoint:
                 self.core.boto = sess.client('s3', endpoint_url=json["settings"]["endpoint_url"])
             return SResponse("success").web()
 
+        @self.core.fast_api.route("/file/backup/final", methods=["POST"])
+        async def backup_final(request: Request):
+            json = await request.json()
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "user"]):
+                return SResponse("params.lacking").web()
+            if self.core.config["master_key"] != json["master_key"]:
+                return SResponse("key.invalid").web()
+            user = json["user"]
+            if self.core.config["object_storage_info"] == {} or self.core.boto is None:
+                return SResponse("internal.error").web()
+            try:
+                def func():
+                    try:
+                        res = self.core.file_function.backup_user_data(json["user"])
+                        if res is None:
+                            return
+                        self.core.boto.upload_file(res, self.core.config["object_storage_info"]["bucket"], "final-upload/" + res.split("/")[:len(user)])
+                        if os.path.exists('data_dir/ftp_data/backup/' + res.split("/")[-1]):
+                            os.remove('data_dir/ftp_data/backup/' + res.split("/")[-1])
+                    except Exception:
+                        pass
+                Thread(target=func).start()
+                return SResponse("success").web()
+            except Exception:
+                return SResponse("internal.error").web()
+
         @self.core.fast_api.route("/file/backup/save", methods=["POST"])
         async def backup_save(request: Request):
             json = await request.json()

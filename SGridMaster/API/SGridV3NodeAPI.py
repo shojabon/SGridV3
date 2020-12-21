@@ -121,10 +121,11 @@ class SGridV3NodeAPI:
         }
         return self.__post_data(self.api_endpoint + "/file/setting/set/", payload)
 
-    def backup_save(self, user: str):
+    def backup_save(self, user: str, key: str):
         payload = {
             "master_key": self.master_key,
-            "user": user
+            "user": user,
+            "key": key
         }
         return self.__post_data(self.api_endpoint + "/file/backup/save/", payload)
 
@@ -135,6 +136,13 @@ class SGridV3NodeAPI:
             "backup_key": key
         }
         return self.__post_data(self.api_endpoint + "/file/backup/load/", payload)
+
+    def backup_final(self, user: str):
+        payload = {
+            "master_key": self.master_key,
+            "user": user,
+        }
+        return self.__post_data(self.api_endpoint + "/file/backup/final/", payload)
 
     def nuke_user(self, user: str):
         payload = {

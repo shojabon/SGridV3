@@ -119,11 +119,20 @@ class SGridV3MasterAPI:
             return SResponse("directory.empty", [])
         return SResponse("success", lis)
 
-    def backup_save(self, node: str, user: str):
+    def backup_final(self, node: str, user: str):
         payload = {
             "master_key": self.master_key,
             "user": user,
             "node": node
+        }
+        return self.__post_data(self.api_endpoint + "/file/backup/final", payload)
+
+    def backup_save(self, node: str, user: str, key: str = str(round(datetime.now().timestamp()))):
+        payload = {
+            "master_key": self.master_key,
+            "user": user,
+            "node": node,
+            "key": key
         }
         return self.__post_data(self.api_endpoint + "/file/backup/save", payload)
 
