@@ -41,7 +41,9 @@ class FileEndpoint:
         @self.core.fast_api.route("/file/backup/list", methods=["POST"])
         async def backup_list(request: Request):
             json = await request.json()
-            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "user", "cache"]):
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "user", "cache", "full"]):
+                return SResponse("params.lacking").web()
+            if type(json["full"]) != bool:
                 return SResponse("params.lacking").web()
             if self.core.config["master_key"] != json["master_key"]:
                 return SResponse("key.invalid").web()
@@ -53,7 +55,10 @@ class FileEndpoint:
                                                    ["backup/" + str(json["user"])]):
                     if x == "backup/" + str(json["user"]):
                         continue
-                    result.append(x["Key"][len("backup/" + str(json["user"])) + 1:])
+                    if json["full"]:
+                        result.append(x)
+                    else:
+                        result.append(x["Key"][len("backup/" + str(json["user"])) + 1:])
                 self.dir_cache[json["user"]] = result
                 self.dir_time[json["user"]] = round(datetime.now().timestamp())
                 return SResponse("success", result).web()

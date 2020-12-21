@@ -1,5 +1,6 @@
 import json
 import traceback
+from datetime import datetime
 from ftplib import FTP
 
 import requests
@@ -105,11 +106,12 @@ class SGridV3MasterAPI:
         return SResponse("success", ftp)
 
     # File Function
-    def backup_list(self, user: str, cache: bool = True):
+    def backup_list(self, user: str, cache: bool = True, full: bool = False):
         payload = {
             "master_key": self.master_key,
             "user": user,
-            "cache": cache
+            "cache": cache,
+            "full": full
         }
         response = self.__post_data(self.api_endpoint + "/file/backup/list", payload)
         if response.fail():
