@@ -115,6 +115,16 @@ class SGridV3MasterAPI:
         }
         return self.__post_data(self.api_endpoint + "/file/backup/list", payload)
 
+    def backup_rename(self, node: str, user: str, key: str, new_key: str):
+        payload = {
+            "master_key": self.master_key,
+            "user": user,
+            "node": node,
+            "key": key,
+            "new_key": new_key
+        }
+        return self.__post_data(self.api_endpoint + "/file/backup/rename", payload)
+
     def backup_final(self, node: str, user: str):
         payload = {
             "master_key": self.master_key,

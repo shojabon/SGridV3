@@ -2,6 +2,7 @@ import traceback
 from datetime import datetime
 
 from API.SResponse import SResponse
+from slugify import slugify
 from starlette.responses import JSONResponse
 
 from MasterMain import SGridV3Master
@@ -156,6 +157,38 @@ class FileEndpoint:
                 if json["user"] in self.dir_cache:
                     del self.dir_cache[json["user"]]
                 return SResponse("internal.error").web()
+
+        @self.core.fast_api.route("/file/backup/rename", methods=["POST"])
+        async def backup_rename(request: Request):
+            json = await request.json()
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "user", "key", "new_key"]):
+                return SResponse("params.lacking").web()
+            if self.core.config["master_key"] != json["master_key"]:
+                return SResponse("key.invalid").web()
+            try:
+                result = []
+                for x in self.getFilteredFilenames(self.core.config["object_storage_info"]["bucket"],
+                                                   ["backup/" + str(json["user"])]):
+                    if x == "backup/" + str(json["user"]):
+                        continue
+                    result.append(x["Key"][len("backup/" + json["user"] + "/"):-4])
+                if json["key"] not in result:
+                    return SResponse("name.invalid").web()
+                if json["new_key"] in result:
+                    return SResponse("name.exists").web()
+                name = slugify(json["new_key"])
+                if len(name) > 32:
+                    return SResponse("name.toolong").web()
+                copy_source = {'Bucket': self.core.config["object_storage_info"]["bucket"], 'Key': "backup/" + str(json["user"]) + "/" + str(json["key"]) + ".zip"}
+                self.core.boto.copy_object(CopySource=copy_source, Bucket=self.core.config["object_storage_info"]["bucket"], Key="backup/" + str(json["user"]) + "/" + str(name) + ".zip")
+                self.core.boto.delete_object(Bucket=self.core.config["object_storage_info"]["bucket"], Key="backup/" + str(json["user"]) + "/" + str(json["key"]) + ".zip")
+                if json["user"] in self.dir_cache:
+                    del self.dir_cache[json["user"]]
+            except Exception:
+                if json["user"] in self.dir_cache:
+                    del self.dir_cache[json["user"]]
+                return SResponse("internal.error").web()
+            return SResponse("success").web()
 
         @self.core.fast_api.route("/file/unzip", methods=["POST"])
         async def file_unzip(request: Request):
