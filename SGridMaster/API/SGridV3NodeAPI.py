@@ -144,6 +144,13 @@ class SGridV3NodeAPI:
         }
         return self.__post_data(self.api_endpoint + "/file/backup/final/", payload)
 
+    def backup_status(self, user: str):
+        payload = {
+            "master_key": self.master_key,
+            "user": user
+        }
+        return self.__post_data(self.api_endpoint + "/file/backup/status/", payload)
+
     def nuke_user(self, user: str):
         payload = {
             "master_key": self.master_key,

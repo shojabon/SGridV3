@@ -60,6 +60,20 @@ class FileEndpoint:
             except Exception:
                 return SResponse("internal.error").web()
 
+        @self.core.fast_api.route("/file/backup/status", methods=["POST"])
+        async def backup_status(request: Request):
+            json = await request.json()
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "user"]):
+                return SResponse("params.lacking").web()
+            if self.core.config["master_key"] != json["master_key"]:
+                return SResponse("key.invalid").web()
+            if self.core.config["object_storage_info"] == {} or self.core.boto is None:
+                return SResponse("internal.error").web()
+            user = json["user"]
+            if user in self.current_task:
+                return SResponse("success").web()
+            return SResponse("task.invalid").web()
+
         @self.core.fast_api.route("/file/backup/save", methods=["POST"])
         async def backup_save(request: Request):
             json = await request.json()
@@ -176,7 +190,7 @@ class FileEndpoint:
                 return SResponse("key.invalid").web()
             try:
                 if not os.path.exists(json["target"]):
-                    return SResponse("params.lacking").web()
+                    return SResponse("path.invalid").web()
                 shutil.unpack_archive(json["target"], json["destination"])
             except Exception:
                 return SResponse("internal.error").web()

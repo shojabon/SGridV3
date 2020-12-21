@@ -112,6 +112,24 @@ class FileEndpoint:
             except Exception:
                 return SResponse("internal.error").web()
 
+        @self.core.fast_api.route("/file/backup/status", methods=["POST"])
+        async def backup_status(request: Request):
+            json = await request.json()
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "user", "node"]):
+                return SResponse("params.lacking").web()
+            if self.core.config["master_key"] != json["master_key"]:
+                return SResponse("key.invalid").web()
+            if not self.core.tool_function.is_node(json["node"]):
+                return SResponse("node.invalid").web()
+            try:
+                sgrid = self.core.tool_function.get_sgrid_node(json["node"])
+                result = sgrid.backup_status(json["user"])
+                if result.fail():
+                    return result.web()
+                return SResponse("success").web()
+            except Exception:
+                return SResponse("internal.error").web()
+
         @self.core.fast_api.route("/file/backup/save", methods=["POST"])
         async def backup_save(request: Request):
             json = await request.json()

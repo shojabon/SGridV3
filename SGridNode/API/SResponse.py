@@ -53,7 +53,13 @@ class SResponse:
             "freetrial.enabled": {"body": "Free Trial Is Enabled"},
             "refund.period.ended": {"body": "Refund Period Ended"},
             "name.toolong": {"body": "Name Is Too Long"},
+            "name.invalid": {"body": "Name Is Invalid"},
+            "name.exists": {"body": "Name Exists"},
             "port.error": {"body": "Port Error"},
+            "backup.exceeded": {"body": "Number Of Backups Exceeded"},
+            "version.invalid": {"body": "Version Is Invalid"},
+            "path.invalid": {"body": "Path Is Invalid"},
+            "task.invalid": {"body": "Task Invalid"},
         }
         self.data = {"code": "unknown", "success": False}
         if error_code in self.error_code:
