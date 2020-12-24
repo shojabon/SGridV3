@@ -17,6 +17,9 @@ class SGridV3MasterAPI:
 
         self.node_list_cache = {}
 
+        self.path_usage_cache = {}
+        self.path_usage_cache_time = {}
+
     def __post_data(self, url: str, payload: dict):
         try:
             response = requests.post(url, json=payload)
@@ -200,6 +203,20 @@ class SGridV3MasterAPI:
             "destination": destination
         }
         return self.__post_data(self.api_endpoint + "/file/unzip", payload)
+
+    def path_usage(self, node: str, path: str):
+        if "node-" + str(path) in self.path_usage_cache_time:
+            if datetime.now().timestamp() - self.path_usage_cache_time["node-" + str(path)] < 10:
+                return self.path_usage_cache["node-" + str(path)]
+        payload = {
+            "master_key": self.master_key,
+            "node": node,
+            "path": path,
+        }
+        result = self.__post_data(self.api_endpoint + "/file/usage", payload)
+        self.path_usage_cache_time["node-" + str(path)] = datetime.now().timestamp()
+        self.path_usage_cache["node-" + str(path)] = result
+        return result
 
     # FTP User
 

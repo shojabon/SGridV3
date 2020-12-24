@@ -166,3 +166,10 @@ class SGridV3NodeAPI:
             "destination": destination
         }
         return self.__post_data(self.api_endpoint + "/file/unzip/", payload)
+
+    def path_usage(self, path: str):
+        payload = {
+            "master_key": self.master_key,
+            "path": path
+        }
+        return self.__post_data(self.api_endpoint + "/file/usage/", payload)

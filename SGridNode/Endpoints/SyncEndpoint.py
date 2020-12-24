@@ -23,4 +23,4 @@ class SyncEndpoint:
                 return SResponse("params.lacking").web()
             if self.core.config["master_key"] != json["master_key"]:
                 return SResponse("key.invalid").web()
-            return SResponse("success", self.core.tool_function.map_md5_local("data_dir/sync"))
+            return SResponse("success", self.core.tool_function.map_md5_local("data_dir/sync")).web()
