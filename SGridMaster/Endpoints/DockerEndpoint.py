@@ -73,7 +73,7 @@ class DockerEndpoint:
                 return SResponse("node.invalid").web()
             node = json["node"]
             if node in self.container_list_time_cache.keys() and node in self.container_list_cache.keys() and datetime.now().timestamp() - self.container_list_time_cache[node] < 1:
-                return SResponse("success", self.container_list_cache[node]).web()
+                return self.container_list_cache[node].web()
 
             try:
                 sgrid = self.core.tool_function.get_sgrid_node(json["node"])
