@@ -108,6 +108,22 @@ class SGridV3MasterAPI:
         ftp.set_pasv(False)
         return SResponse("success", ftp)
 
+    def get_node_ip(self, node: str):
+        is_node = self.is_node(node)
+        if is_node.fail():
+            return is_node
+        node_data = self.node_list_cache[node]
+        node_address = node_data["address"][7:]
+        if node_address[-1] == "/":
+            node_address = str(node_address[:-1]).split(":")[0]
+        return SResponse("success", node_address)
+
+    def get_node_region(self, node: str):
+        is_node = self.is_node(node)
+        if is_node.fail():
+            return is_node
+        return SResponse("success", self.node_list_cache[node]["region"])
+
     # File Function
 
     def backup_final_list(self):
