@@ -1,6 +1,7 @@
 import os
 import shutil
 import traceback
+from datetime import datetime
 from threading import Thread
 
 import boto3
@@ -15,10 +16,65 @@ class FileEndpoint:
     def __init__(self, core: SGridV3Node):
         self.core = core
         self.register_endpoints()
-
         self.current_task = []
 
+        self.object_cache = {}
+
+    def delete_objects_in_cache(self):
+        for path in self.object_cache.keys():
+            time_data = self.object_cache[path]
+            if datetime.now().timestamp() - time_data > 10 * 60:
+                if os.path.exists("data_dir/ftp_data/object/" + str(path)):
+                    os.remove("data_dir/ftp_data/object/" + str(path))
+                    if path in self.object_cache:
+                        del self.object_cache[path]
+
     def register_endpoints(self):
+        @self.core.fast_api.route("/file/object/load", methods=["POST"])
+        async def object_load(request: Request):
+            json = await request.json()
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "user", "object_path"]):
+                return SResponse("params.lacking").web()
+            if self.core.config["master_key"] != json["master_key"]:
+                return SResponse("key.invalid").web()
+            user = json["user"]
+            if user in self.current_task:
+                return SResponse("task.exists").web()
+            if self.core.config["object_storage_info"] == {} or self.core.boto is None:
+                return SResponse("internal.error").web()
+            if json["object_path"][len(json["object_path"])-4:] != ".zip":
+                return SResponse("path.invalid").web()
+            try:
+                local_path = "data_dir/ftp_data/object/" + json["object_path"]
+                file_name = str(json["object_path"]).split("/")[-1]
+                os.makedirs(local_path[:-len(file_name)], exist_ok=True)
+
+                def func():
+                    try:
+                        if json["object_path"] not in self.object_cache:
+                            self.core.boto.download_file(self.core.config["object_storage_info"]["bucket"],
+                                                         json["object_path"],
+                                                         local_path)
+                        self.object_cache[json["object_path"]] = datetime.now().timestamp()
+                        if os.path.exists(local_path):
+                            shutil.unpack_archive(local_path, "data_dir/ftp_data/users/" + str(user))
+                        self.delete_objects_in_cache()
+                    except Exception:
+                        print(traceback.format_exc())
+                        pass
+                    finally:
+                        if user in self.current_task:
+                            self.current_task.remove(user)
+
+                self.current_task.append(user)
+                Thread(target=func).start()
+                return SResponse("success").web()
+            except Exception:
+                print(traceback.format_exc())
+                if user in self.current_task:
+                    self.current_task.remove(user)
+                return SResponse("internal.error").web()
+
         @self.core.fast_api.route("/file/setting/set", methods=["POST"])
         async def object_setting_set(request: Request):
             json = await request.json()
@@ -50,11 +106,13 @@ class FileEndpoint:
                         res = self.core.file_function.backup_user_data(json["user"])
                         if res is None:
                             return
-                        self.core.boto.upload_file(res, self.core.config["object_storage_info"]["bucket"], "final-upload/" + str(json["user"]) + ".zip")
+                        self.core.boto.upload_file(res, self.core.config["object_storage_info"]["bucket"],
+                                                   "final-upload/" + str(json["user"]) + ".zip")
                         if os.path.exists('data_dir/ftp_data/backup/' + res.split("/")[-1]):
                             os.remove('data_dir/ftp_data/backup/' + res.split("/")[-1])
                     except Exception:
                         pass
+
                 Thread(target=func).start()
                 return SResponse("success").web()
             except Exception:
@@ -99,7 +157,8 @@ class FileEndpoint:
                             if user in self.current_task:
                                 self.current_task.remove(user)
                             return
-                        self.core.boto.upload_file(res, self.core.config["object_storage_info"]["bucket"], "backup/" + str(user) + "/" + res.split("/")[-1][len(user) + 1:])
+                        self.core.boto.upload_file(res, self.core.config["object_storage_info"]["bucket"],
+                                                   "backup/" + str(user) + "/" + res.split("/")[-1][len(user) + 1:])
                         if os.path.exists('data_dir/ftp_data/backup/' + res.split("/")[-1]):
                             os.remove('data_dir/ftp_data/backup/' + res.split("/")[-1])
                         if user in self.current_task:
@@ -134,7 +193,9 @@ class FileEndpoint:
                 def func():
                     file_name = str(backup_key) + ".zip"
                     try:
-                        self.core.boto.download_file(self.core.config["object_storage_info"]["bucket"], "backup/" + str(user) + "/" + str(file_name), "data_dir/ftp_data/backup/" + str(file_name))
+                        self.core.boto.download_file(self.core.config["object_storage_info"]["bucket"],
+                                                     "backup/" + str(user) + "/" + str(file_name),
+                                                     "data_dir/ftp_data/backup/" + str(file_name))
                         self.core.file_function.unpack_user_data(str(user), file_name)
                         if os.path.exists('data_dir/ftp_data/backup/' + file_name):
                             os.remove('data_dir/ftp_data/backup/' + file_name)

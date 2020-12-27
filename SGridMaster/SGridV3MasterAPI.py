@@ -126,6 +126,23 @@ class SGridV3MasterAPI:
 
     # File Function
 
+    def object_load(self, node: str, user: str, object_path: str):
+        payload = {
+            "master_key": self.master_key,
+            "user": user,
+            "node": node,
+            "object_path": object_path
+        }
+        return self.__post_data(self.api_endpoint + "/file/object/load", payload)
+
+    def object_list(self, name_only: bool=True, sub_folder=None):
+        payload = {
+            "master_key": self.master_key,
+            "name_only": name_only,
+            "sub_folder": sub_folder,
+        }
+        return self.__post_data(self.api_endpoint + "/file/object/list", payload)
+
     def backup_final_list(self):
         payload = {
             "master_key": self.master_key,

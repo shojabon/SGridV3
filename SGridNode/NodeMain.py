@@ -1,8 +1,11 @@
 import argparse
 import json
 import os
+import shutil
 
 import sys
+import time
+
 sys.path.append('../')
 
 import boto3
@@ -15,8 +18,10 @@ class SGridV3Node:
 
     def __init__(self, region: str, name: str, tag, master_key: str):
 
-        os.makedirs("data_dir/sync", exist_ok=True)
-        os.makedirs("data_dir/ftp_data", exist_ok=True)
+        if os.path.exists("data_dir/ftp_data/object/"):
+            shutil.rmtree("data_dir/ftp_data/object/")
+            time.sleep(1)
+        os.makedirs("data_dir/ftp_data/object/", exist_ok=True)
 
         self.fast_api = FastAPI(debug=True)
         self.docker = docker.from_env()
@@ -46,9 +51,6 @@ class SGridV3Node:
 
         from SGridNode.Endpoints.DockerEndpoint import DockerEndpoint
         self.docker_endpoint = DockerEndpoint(self)
-
-        from SGridNode.Endpoints.SyncEndpoint import SyncEndpoint
-        self.sync_endpoint = SyncEndpoint(self)
 
         from SGridNode.ModuleFunctions.FTP import FTPFunction
         self.ftp_function = FTPFunction(self)

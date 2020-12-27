@@ -18,6 +18,9 @@ class FileEndpoint:
         self.dir_cache = {}
         self.dir_time = {}
 
+        self.object_cache = self.getFilteredFilenames(self.core.config["object_storage_info"]["bucket"], ["objects/"])
+        self.object_cache_time = datetime.now().timestamp()
+
     def getFilteredFilenames(self, bucket_name, file_names):
         if len(file_names) == 0:
             start = ''
@@ -40,6 +43,62 @@ class FileEndpoint:
         return file_names
 
     def register_endpoints(self):
+
+        @self.core.fast_api.route("/file/object/list", methods=["POST"])
+        async def object_list(request: Request):
+            json = await request.json()
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "sub_folder", "name_only"]):
+                return SResponse("params.lacking").web()
+            if type(json["name_only"]) != bool:
+                return SResponse("params.lacking").web()
+            if self.core.config["master_key"] != json["master_key"]:
+                return SResponse("key.invalid").web()
+            if datetime.now().timestamp() - self.object_cache_time > 10:
+                self.object_cache = self.getFilteredFilenames(self.core.config["object_storage_info"]["bucket"],
+                                                               ["objects/"])
+                self.object_cache_time = datetime.now().timestamp()
+            try:
+                directory = "objects/"
+                sub_folder = json["sub_folder"] is not None
+                if sub_folder:
+                    directory += json["sub_folder"]
+                    if directory[-1] != "/": directory += "/"
+
+                result = []
+                for obj in self.object_cache:
+                    if obj["Key"] == "objects/" or obj["Key"] == directory:
+                        continue
+                    if json["name_only"]:
+                        result.append(obj["Key"][len(directory):])
+                    else:
+                        result.append(obj)
+                return SResponse("success", result).web()
+            except Exception:
+                print(traceback.format_exc())
+                return SResponse("internal.error").web()
+
+
+        @self.core.fast_api.route("/file/object/load", methods=["POST"])
+        async def object_load(request: Request):
+            json = await request.json()
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "user", "node", "object_path"]):
+                return SResponse("params.lacking").web()
+            if self.core.config["master_key"] != json["master_key"]:
+                return SResponse("key.invalid").web()
+            if not self.core.tool_function.is_node(json["node"]):
+                return SResponse("node.invalid").web()
+            if json["object_path"][len(json["object_path"])-4:] != ".zip":
+                return SResponse("path.invalid").web()
+            if datetime.now().timestamp() - self.object_cache_time > 10:
+                self.object_cache = self.getFilteredFilenames(self.core.config["object_storage_info"]["bucket"], ["objects/"])
+                self.object_cache_time = datetime.now().timestamp()
+            if json["object_path"] not in [x["Key"] for x in self.object_cache]:
+                return SResponse("path.invalid").web()
+            try:
+                sgrid = self.core.tool_function.get_sgrid_node(json["node"])
+                return sgrid.object_load(json["user"], json["object_path"]).web()
+            except Exception:
+                return SResponse("internal.error").web()
 
         @self.core.fast_api.route("/file/backup/final/list", methods=["POST"])
         async def backup_final_list(request: Request):

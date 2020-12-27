@@ -98,13 +98,6 @@ class SGridV3NodeAPI:
         }
         return self.__post_data(self.api_endpoint + "/docker/image/delete/", payload)
 
-    # Sync
-    def sync_map(self):
-        payload = {
-            "master_key": self.master_key,
-        }
-        return self.__post_data(self.api_endpoint + "/sync/map/", payload)
-
     # FTP
     def ftp_user_set(self, users: dict):
         payload = {
@@ -114,6 +107,14 @@ class SGridV3NodeAPI:
         return self.__post_data(self.api_endpoint + "/ftp/users/set/", payload)
 
     # File
+    def object_load(self, user: str, object_path: str):
+        payload = {
+            "master_key": self.master_key,
+            "user": user,
+            "object_path": object_path
+        }
+        return self.__post_data(self.api_endpoint + "/file/object/load/", payload)
+
     def file_settings_set(self, settings: dict):
         payload = {
             "master_key": self.master_key,

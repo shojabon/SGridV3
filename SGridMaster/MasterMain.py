@@ -16,8 +16,6 @@ class SGridV3Master:
 
     def __init__(self):
         self.fast_api = FastAPI(debug=True)
-        os.makedirs("data_dir/sync", exist_ok=True)
-
 
         self.nodes = self.load_config("nodes.json")
         self.config = self.load_config("config.json")
@@ -29,15 +27,13 @@ class SGridV3Master:
                              aws_secret_access_key=self.config["object_storage_info"]["secret_access_key"])
         self.boto = sess.client('s3', endpoint_url=self.config["object_storage_info"]["endpoint_url"])
 
+
         if "master_key" not in self.config:
             self.config["master_key"] = ""
         self.save_config(self.config, "config.json")
 
         from SGridMaster.ModuleFunctions.Nodes import NodeFunction
         self.node_function = NodeFunction(self)
-
-        from SGridMaster.ModuleFunctions.Sync import SyncFunction
-        self.sync_function = SyncFunction(self)
 
         from SGridMaster.ModuleFunctions.Tool import ToolFunction
         self.tool_function = ToolFunction(self)
@@ -63,8 +59,6 @@ class SGridV3Master:
 
         self.node_name_address = self.node_function.create_nodeid_to_address()
         self.node_address_name = self.node_function.create_node_address_to_id()
-
-        self.sync_function.sync_all_nodes()
 
         Thread(target=self.node_function.record_node_task).start()
 
