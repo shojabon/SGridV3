@@ -62,7 +62,9 @@ class SGridV3Master:
 
         Thread(target=self.node_function.record_node_task).start()
 
-        self.node_function.push_all_settings()
+        #self.node_function.push_all_settings()
+
+
 
         uvicorn.run(self.fast_api, host="0.0.0.0", port=2500)
 

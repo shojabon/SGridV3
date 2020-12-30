@@ -58,7 +58,7 @@ class FileEndpoint:
                                                                ["objects/"])
                 self.object_cache_time = datetime.now().timestamp()
             try:
-                directory = "objects/"
+                directory = ""
                 sub_folder = json["sub_folder"] is not None
                 if sub_folder:
                     directory += json["sub_folder"]
@@ -66,7 +66,7 @@ class FileEndpoint:
 
                 result = []
                 for obj in self.object_cache:
-                    if obj["Key"] == "objects/" or obj["Key"] == directory:
+                    if obj["Key"] == "objects/" or obj["Key"] == directory or not obj["Key"].startswith(directory):
                         continue
                     if json["name_only"]:
                         result.append(obj["Key"][len(directory):])
@@ -198,11 +198,12 @@ class FileEndpoint:
                 return SResponse("node.invalid").web()
             try:
                 sgrid = self.core.tool_function.get_sgrid_node(json["node"])
-                result = sgrid.backup_status(json["user"])
+                result = sgrid.backup_status(json["node"], json["user"])
                 if result.fail():
                     return result.web()
                 return SResponse("success").web()
             except Exception:
+                print(traceback.format_exc())
                 return SResponse("internal.error").web()
 
         @self.core.fast_api.route("/file/backup/save", methods=["POST"])
