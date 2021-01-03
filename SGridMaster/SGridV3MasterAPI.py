@@ -253,13 +253,14 @@ class SGridV3MasterAPI:
 
     # FTP User
 
-    def ftp_user_add(self, node: str, user: str, password: str, limit_mb: int):
+    def ftp_user_add(self, node: str, user: str, password: str, directory: str, limit_mb: int):
         payload = {
             "master_key": self.master_key,
             "node": node,
             "user": user,
             "password": password,
-            "limit_mb": limit_mb
+            "limit_mb": limit_mb,
+            "directory": directory
         }
         return self.__post_data(self.api_endpoint + "/ftp/user/add", payload)
 

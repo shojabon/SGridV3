@@ -16,7 +16,7 @@ class FTPEndpoint:
         @self.core.fast_api.route("/ftp/user/add", methods=["POST"])
         async def ftp_user_add(request: Request):
             json = await request.json()
-            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "node", "user", "password", "limit_mb"]):
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "node", "user", "password", "directory", "limit_mb"]):
                 return SResponse("params.lacking").web()
             if self.core.config["master_key"] != json["master_key"]:
                 return SResponse("key.invalid").web()
@@ -29,6 +29,7 @@ class FTPEndpoint:
                 self.core.nodes[address]["ftp_users"][json["user"]] = {
                     "password": json["password"],
                     "limit_mb": json["limit_mb"],
+                    "directory": json["directory"]
                 }
                 self.core.save_config(self.core.nodes, "nodes.json")
                 grid = self.core.tool_function.get_sgrid_node(json["node"])

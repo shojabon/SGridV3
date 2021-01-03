@@ -18,7 +18,7 @@ class CustomHandler(FTPHandler):
                 dir_char_len = len(os.getcwd().replace("\\", "/")) + 1 + len("data_dir/ftp_data/users/")
                 user = args[0].replace("\\", "/")[dir_char_len:].split("/")[0]
                 data = self.core.ftp_users[user]
-                dir_size = self.core.tool_function.get_dir_size("data_dir/ftp_data/users/" + str(user))
+                dir_size = self.core.tool_function.get_dir_size("data_dir/ftp_data/users/" + data["directory"])
                 if dir_size > data["limit_mb"] * 1024 * 1024:
                     self.respond("452 Disk full")
                 else:
@@ -33,7 +33,7 @@ class CustomHandler(FTPHandler):
             dir_char_len = len(os.getcwd().replace("\\", "/")) + 1 + len("data_dir/ftp_data/users/".replace("\\", "/"))
             user = str(file.replace("\\", "/")[dir_char_len:]).split("/")[0]
             data = self.core.ftp_users[user]
-            dir_size = self.core.tool_function.get_dir_size("data_dir/ftp_data/users/" + str(user))
+            dir_size = self.core.tool_function.get_dir_size("data_dir/ftp_data/users/" + data["directory"])
             if dir_size > data["limit_mb"] * 1024 * 1024:
                 os.remove(file)
 
@@ -73,6 +73,6 @@ class FTPFunction:
     def load_users(self):
         for user in self.core.ftp_users.keys():
             data = self.core.ftp_users[user]
-            os.makedirs("data_dir/ftp_data/users/" + str(user), exist_ok=True)
+            os.makedirs("data_dir/ftp_data/" + self.core.ftp_users[user]["directory"], exist_ok=True)
             if not self.authorizer.has_user(user):
-                self.authorizer.add_user(user, data["password"], "data_dir/ftp_data/users/" + str(user), "elradfmwMT")
+                self.authorizer.add_user(user, data["password"], "data_dir/ftp_data/" + self.core.ftp_users[user]["directory"], "elradfmwMT")
