@@ -96,18 +96,6 @@ class SGridV3MasterAPI:
             return SResponse("success")
         return SResponse("node.invalid")
 
-    def get_node_ftp(self, node: str):
-        is_node = self.is_node(node)
-        if is_node.fail():
-            return is_node
-        node_data = self.node_list_cache[node]
-        node_address = node_data["address"][7:]
-        if node_address[-1] == "/":
-            node_address = str(node_address[:-1]).split(":")[0]
-        ftp = FTP(host=node_address, user="sgrid-master-user", passwd=self.master_key)
-        ftp.set_pasv(False)
-        return SResponse("success", ftp)
-
     def get_node_ip(self, node: str):
         is_node = self.is_node(node)
         if is_node.fail():
@@ -324,7 +312,7 @@ class SGridV3MasterAPI:
         is_node = self.is_node(node)
         if is_node.fail():
             return is_node
-        return SFile(self.master_key, "http://" + self.get_node_ip(node).body() + ":2000")
+        return SResponse("success", SFile(self.master_key, "http://" + self.get_node_ip(node).body() + ":2000"))
 
 
 

@@ -44,7 +44,6 @@ class FTPFunction:
         self.core = core
 
         self.authorizer = DummyAuthorizer()
-        self.authorizer.add_user("sgrid-master-user", self.core.config["master_key"], "data_dir/", "elradfmwMT")
         # self.authorizer.add_user("sho", "testpassword", "data_dir/ftp_data/users/sho", "elradfmwMT")
 
         self.handler = CustomHandler
@@ -53,8 +52,8 @@ class FTPFunction:
         self.handler.core = core
 
         self.throttler = ThrottledDTPHandler
-        self.throttler.read_limit = 1.5 * 1024
-        self.throttler.write_limit = 1.5 * 1024
+        self.throttler.read_limit = 1.2 * 1024
+        self.throttler.write_limit = 1.2 * 1024
 
         self.handler.dtp_handler = self.throttler
 

@@ -74,7 +74,7 @@ class SFileEndpoint:
                 return SResponse("internal.error").web()
 
         @self.core.fast_api.route("/sfile/file/set", methods=["POST"])
-        async def sfile_file_get(request: Request):
+        async def sfile_file_set(request: Request):
             json = await request.json()
             if not self.core.tool_function.does_post_params_exist(json, ["master_key", "path", "data"]):
                 return SResponse("params.lacking").web()
@@ -87,11 +87,12 @@ class SFileEndpoint:
             file_name = path.split("/")[-1]
             if file_name == "":
                 return SResponse("name.invalid").web()
-            if not os.path.isfile(path):
+            if os.path.exists(path) and not os.path.isfile(path):
                 return SResponse("path.invalid").web()
             try:
-                file = open(path, "w")
+                file = open(path, "w+")
                 file.writelines(json["data"])
+                file.close()
                 return SResponse("success").web()
             except Exception:
                 print(traceback.format_exc())
