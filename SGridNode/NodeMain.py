@@ -64,6 +64,9 @@ class SGridV3Node:
         from SGridNode.Endpoints.FileEndpoint import FileEndpoint
         self.file_endpoint = FileEndpoint(self)
 
+        from Endpoints.SFileEndpoint import SFileEndpoint
+        self.sfile_edpoint = SFileEndpoint(self)
+
         self.file_function.clear_backup()
 
         uvicorn.run(self.fast_api, host="0.0.0.0", port=2000)

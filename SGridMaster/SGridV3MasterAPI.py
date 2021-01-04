@@ -279,7 +279,11 @@ class SGridV3MasterAPI:
         return self.__post_data(self.api_endpoint + "/ftp/user/list", payload)
 
 if __name__ == '__main__':
-    grid = SGridV3MasterAPI("cOZUTx#k[x2-G6]1", "http://45.32.15.160:2500/")
+    grid = SGridV3MasterAPI("cOZUTx#k[x2-G6]1", "http://167.179.89.11:2500/")
+    res = list()
+    print(grid.get_node_ftp("JP1").body().retrlines(
+                "RETR ftp_data/users/7f787ad275b90ea38ce5b9269d2bc61f/eula.txt", res.append))
+    print(res)
     #print(grid.ftp_user_add("TEST", "asdasda", "asdaasd", 10))
     #print(grid.ftp_user_remove("TEST", "asdasda"))
     #print(grid.container_stop("development", "test"))

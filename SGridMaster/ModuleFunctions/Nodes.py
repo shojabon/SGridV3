@@ -33,11 +33,10 @@ class NodeFunction:
             if "node_id" not in self.core.nodes[node_ip]:
                 grid_api = SGridV3NodeAPI(self.core.config["master_key"], node_ip)
                 info = grid_api.node_info()
-                if info is None:
+                if info.fail():
                     continue
-                self.core.nodes[node_ip] = info
+                self.core.nodes[node_ip] = info.body()
                 self.core.nodes[node_ip]["enabled"] = True
-                self.core.nodes[node_ip]["sync_path"] = ["all"]
                 self.core.nodes[node_ip]["ftp_users"] = {}
         self.core.save_config(self.core.nodes, "nodes.json")
 

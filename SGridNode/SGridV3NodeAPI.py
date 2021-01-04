@@ -174,3 +174,37 @@ class SGridV3NodeAPI:
             "path": path
         }
         return self.__post_data(self.api_endpoint + "/file/usage/", payload)
+
+    # SFile Test
+    def sfile_list(self, path: str):
+        payload = {
+            "master_key": self.master_key,
+            "path": path
+        }
+        return self.__post_data(self.api_endpoint + "/sfile/list/", payload)
+
+    def sfile_rm_dir(self, path: str):
+        payload = {
+            "master_key": self.master_key,
+            "path": path
+        }
+        return self.__post_data(self.api_endpoint + "/sfile/rm/directory", payload)
+
+    def sfile_file_get(self, path: str):
+        payload = {
+            "master_key": self.master_key,
+            "path": path
+        }
+        return self.__post_data(self.api_endpoint + "/sfile/file/get", payload)
+
+    def sfile_file_set(self, path: str, data):
+        payload = {
+            "master_key": self.master_key,
+            "path": path,
+            "data": data
+        }
+        return self.__post_data(self.api_endpoint + "/sfile/file/set", payload)
+
+if __name__ == '__main__':
+    grid = SGridV3NodeAPI("test", "http://127.0.0.1:2000/")
+    print(grid.sfile_file_set("test", ["test"]))
