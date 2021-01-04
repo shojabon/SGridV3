@@ -278,6 +278,57 @@ class SGridV3MasterAPI:
         }
         return self.__post_data(self.api_endpoint + "/ftp/user/list", payload)
 
+    def get_sfile(self, node: str):
+        class SFile:
+            def __init__(self, master_key: str, endpoint: str):
+                self.master_key = master_key
+                self.api_endpoint = endpoint
+
+            def __post_data(self, url: str, payload: dict):
+                try:
+                    response = requests.post(url, json=payload)
+                    if response.status_code != 200:
+                        return SResponse("web.error")
+                    return SResponse(error_code=None, body=json.loads(response.text))
+                except Exception:
+                    return SResponse("internal.error")
+
+            def sfile_list(self, path: str):
+                payload = {
+                    "master_key": self.master_key,
+                    "path": path
+                }
+                return self.__post_data(self.api_endpoint + "/sfile/list/", payload)
+
+            def sfile_rm_dir(self, path: str):
+                payload = {
+                    "master_key": self.master_key,
+                    "path": path
+                }
+                return self.__post_data(self.api_endpoint + "/sfile/rm/directory", payload)
+
+            def sfile_file_get(self, path: str):
+                payload = {
+                    "master_key": self.master_key,
+                    "path": path
+                }
+                return self.__post_data(self.api_endpoint + "/sfile/file/get", payload)
+
+            def sfile_file_set(self, path: str, data):
+                payload = {
+                    "master_key": self.master_key,
+                    "path": path,
+                    "data": data
+                }
+                return self.__post_data(self.api_endpoint + "/sfile/file/set", payload)
+        is_node = self.is_node(node)
+        if is_node.fail():
+            return is_node
+        return SFile(self.master_key, "http://" + self.get_node_ip(node).body() + ":2000")
+
+
+
+
 if __name__ == '__main__':
     grid = SGridV3MasterAPI("cOZUTx#k[x2-G6]1", "http://167.179.89.11:2500/")
     res = list()
