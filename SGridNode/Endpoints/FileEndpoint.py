@@ -144,7 +144,7 @@ class FileEndpoint:
                 return SResponse("task.exists").web()
             if self.core.config["object_storage_info"] == {} or self.core.boto is None:
                 return SResponse("internal.error").web()
-            key = slugify(json["key"])
+            key = slugify(str(json["key"]))
             if len(key) > 32:
                 return SResponse("name.toolong").web()
             if key == "":
@@ -188,7 +188,7 @@ class FileEndpoint:
                 return SResponse("internal.error").web()
             if len(json["backup_key"]) > 32:
                 return SResponse("name.toolong").web()
-            backup_key = slugify(json["backup_key"])
+            backup_key = slugify(str(json["backup_key"]))
             try:
                 def func():
                     file_name = str(backup_key) + ".zip"

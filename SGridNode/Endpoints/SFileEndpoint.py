@@ -97,3 +97,53 @@ class SFileEndpoint:
             except Exception:
                 print(traceback.format_exc())
                 return SResponse("internal.error").web()
+
+        @self.core.fast_api.route("/sfile/file/rename", methods=["POST"])
+        async def sfile_file_rename(request: Request):
+            json = await request.json()
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "path", "name"]):
+                return SResponse("params.lacking").web()
+            if self.core.config["master_key"] != json["master_key"]:
+                return SResponse("key.invalid").web()
+            path = "data_dir/ftp_data/" + json["path"]
+            if path != "" and path[-1] == "/":
+                path = path[:-1]
+
+            file_name = path.split("/")[-1]
+            if file_name == "":
+                return SResponse("name.invalid").web()
+            if os.path.exists(path) and not os.path.isfile(path):
+                return SResponse("path.invalid").web()
+            new_path = ""
+            for x in path.split("/")[:-1]:
+                new_path += str(x) + "/"
+            new_path += str(json["name"]).split("/")[-1]
+            try:
+                os.rename(path, new_path)
+                return SResponse("success").web()
+            except Exception:
+                print(traceback.format_exc())
+                return SResponse("internal.error").web()
+
+        @self.core.fast_api.route("/sfile/rm/file", methods=["POST"])
+        async def sfile_rm_file(request: Request):
+            json = await request.json()
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "path"]):
+                return SResponse("params.lacking").web()
+            if self.core.config["master_key"] != json["master_key"]:
+                return SResponse("key.invalid").web()
+            path = "data_dir/ftp_data/" + json["path"]
+            if path != "" and path[-1] == "/":
+                path = path[:-1]
+
+            file_name = path.split("/")[-1]
+            if file_name == "":
+                return SResponse("name.invalid").web()
+            if os.path.exists(path) and not os.path.isfile(path):
+                return SResponse("path.invalid").web()
+            try:
+                os.remove(path)
+                return SResponse("success").web()
+            except Exception:
+                print(traceback.format_exc())
+                return SResponse("internal.error").web()

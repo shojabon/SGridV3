@@ -308,6 +308,7 @@ class FileEndpoint:
                 if json["user"] in self.dir_cache:
                     del self.dir_cache[json["user"]]
             except Exception:
+                print(traceback.format_exc())
                 if json["user"] in self.dir_cache:
                     del self.dir_cache[json["user"]]
                 return SResponse("internal.error").web()

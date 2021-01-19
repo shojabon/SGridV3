@@ -64,8 +64,6 @@ class SGridV3Master:
 
         #self.node_function.push_all_settings()
 
-
-
         uvicorn.run(self.fast_api, host="0.0.0.0", port=2500)
 
     def load_config(self, file: str):

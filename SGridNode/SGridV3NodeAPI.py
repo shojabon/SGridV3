@@ -205,6 +205,21 @@ class SGridV3NodeAPI:
         }
         return self.__post_data(self.api_endpoint + "/sfile/file/set", payload)
 
+    def sfile_file_rename(self, path: str, name: str):
+        payload = {
+            "master_key": self.master_key,
+            "path": path,
+            "name": name
+        }
+        return self.__post_data(self.api_endpoint + "/sfile/file/rename", payload)
+
+    def sfile_rm_file(self, path: str):
+        payload = {
+            "master_key": self.master_key,
+            "path": path
+        }
+        return self.__post_data(self.api_endpoint + "/sfile/rm/file", payload)
+
 if __name__ == '__main__':
     grid = SGridV3NodeAPI("test", "http://127.0.0.1:2000/")
     print(grid.sfile_file_set("test", ["test"]))

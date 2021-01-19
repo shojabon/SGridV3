@@ -281,52 +281,57 @@ class SGridV3MasterAPI:
                 except Exception:
                     return SResponse("internal.error")
 
-            def sfile_list(self, path: str):
+            def list(self, path: str):
                 payload = {
                     "master_key": self.master_key,
                     "path": path
                 }
                 return self.__post_data(self.api_endpoint + "/sfile/list/", payload)
 
-            def sfile_rm_dir(self, path: str):
+            def rm_dir(self, path: str):
                 payload = {
                     "master_key": self.master_key,
                     "path": path
                 }
                 return self.__post_data(self.api_endpoint + "/sfile/rm/directory", payload)
 
-            def sfile_file_get(self, path: str):
+            def file_get(self, path: str):
                 payload = {
                     "master_key": self.master_key,
                     "path": path
                 }
                 return self.__post_data(self.api_endpoint + "/sfile/file/get", payload)
 
-            def sfile_file_set(self, path: str, data):
+            def file_set(self, path: str, data):
                 payload = {
                     "master_key": self.master_key,
                     "path": path,
                     "data": data
                 }
                 return self.__post_data(self.api_endpoint + "/sfile/file/set", payload)
+
+            def file_rename(self, path: str, name):
+                payload = {
+                    "master_key": self.master_key,
+                    "path": path,
+                    "name": name
+                }
+                return self.__post_data(self.api_endpoint + "/sfile/file/rename", payload)
+
+            def rm_file(self, path: str):
+                payload = {
+                    "master_key": self.master_key,
+                    "path": path
+                }
+                return self.__post_data(self.api_endpoint + "/sfile/rm/file", payload)
+
         is_node = self.is_node(node)
         if is_node.fail():
-            return is_node
-        return SResponse("success", SFile(self.master_key, "http://" + self.get_node_ip(node).body() + ":2000"))
+            return None
+        return SFile(self.master_key, "http://" + self.get_node_ip(node).body() + ":2000")
 
 
 
 
 if __name__ == '__main__':
     grid = SGridV3MasterAPI("cOZUTx#k[x2-G6]1", "http://167.179.89.11:2500/")
-    res = list()
-    print(grid.get_node_ftp("JP1").body().retrlines(
-                "RETR ftp_data/users/7f787ad275b90ea38ce5b9269d2bc61f/eula.txt", res.append))
-    print(res)
-    #print(grid.ftp_user_add("TEST", "asdasda", "asdaasd", 10))
-    #print(grid.ftp_user_remove("TEST", "asdasda"))
-    #print(grid.container_stop("development", "test"))
-    #print(grid.container_run("development", "ubuntu:18.04", {"name": "test", "remove": True, "tty": True, "detach": True}))
-    #print(grid.backup_list("sho"))
-    #print(grid.backup_load("TEST", "sho", "1606417526"))
-    #print(grid.nuke_user("TEST", "sho"))

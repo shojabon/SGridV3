@@ -1,11 +1,9 @@
 import traceback
 
 from API.SResponse import SResponse
-from starlette.responses import JSONResponse
 
 from SGridNode.NodeMain import SGridV3Node
 from fastapi import Request
-import json as json_class
 
 
 class FTPClientEndpoint:

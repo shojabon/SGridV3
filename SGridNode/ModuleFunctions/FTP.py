@@ -17,8 +17,9 @@ class CustomHandler(FTPHandler):
             if str(args[0].replace("\\", "/")[len(os.getcwd().replace("\\", "/")) + 1:]).startswith("data_dir/ftp_data/users/"):
                 dir_char_len = len(os.getcwd().replace("\\", "/")) + 1 + len("data_dir/ftp_data/users/")
                 user = args[0].replace("\\", "/")[dir_char_len:].split("/")[0]
-                data = self.core.ftp_users[user]
-                dir_size = self.core.tool_function.get_dir_size("data_dir/ftp_data/users/" + data["directory"])
+                data = self.core.ftp_users[user[:8]]
+                dir_size = self.core.tool_function.get_dir_size("data_dir/ftp_data/" + data["directory"])
+                print(dir_size, "data_dir/ftp_data/" + data["directory"])
                 if dir_size > data["limit_mb"] * 1024 * 1024:
                     self.respond("452 Disk full")
                 else:
@@ -32,8 +33,8 @@ class CustomHandler(FTPHandler):
         if str(file.replace("\\", "/")[len(os.getcwd().replace("\\", "/")) + 1:]).startswith("data_dir/ftp_data/users/"):
             dir_char_len = len(os.getcwd().replace("\\", "/")) + 1 + len("data_dir/ftp_data/users/".replace("\\", "/"))
             user = str(file.replace("\\", "/")[dir_char_len:]).split("/")[0]
-            data = self.core.ftp_users[user]
-            dir_size = self.core.tool_function.get_dir_size("data_dir/ftp_data/users/" + data["directory"])
+            data = self.core.ftp_users[user[:8]]
+            dir_size = self.core.tool_function.get_dir_size("data_dir/ftp_data/" + data["directory"])
             if dir_size > data["limit_mb"] * 1024 * 1024:
                 os.remove(file)
 
@@ -52,16 +53,15 @@ class FTPFunction:
         self.handler.core = core
 
         self.throttler = ThrottledDTPHandler
-        self.throttler.read_limit = 1.2 * 1024
-        self.throttler.write_limit = 1.2 * 1024
+        self.throttler.read_limit = 1.2 * 1024 * 1024
+        self.throttler.write_limit = 1.2 * 1024 * 1024
 
         self.handler.dtp_handler = self.throttler
 
         # FTP
         self.handler.authorizer = self.authorizer
         self.ftp_server = FTPServer(("0.0.0.0", 21), self.handler)
-        self.ftp_server.max_cons = 300
-        self.ftp_server.max_cons_per_ip = 5
+        self.ftp_server.max_cons_per_ip = 3
 
         os.makedirs("data_dir/ftp_data/backup", exist_ok=True)
 
