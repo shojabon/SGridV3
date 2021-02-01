@@ -123,7 +123,7 @@ class FileEndpoint:
         @self.core.fast_api.route("/file/backup/download", methods=["POST"])
         async def backup_request_download_link(request: Request):
             json = await request.json()
-            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "user", "key", "expire"]):
+            if not self.core.tool_function.does_post_params_exist(json, ["master_key", "user", "key", "expire", "filename"]):
                 return SResponse("params.lacking").web()
             if self.core.config["master_key"] != json["master_key"]:
                 return SResponse("key.invalid").web()
@@ -131,9 +131,13 @@ class FileEndpoint:
                 backups = [x["Key"][len("backup/" + str(json["user"])) + 1:-4] for x in self.getFilteredFilenames(self.core.config["object_storage_info"]["bucket"], ["backup/" + str(json["user"]) + "/"])]
                 if json["key"] not in backups:
                     return SResponse("backup.invalid").web()
-                result = self.core.boto.generate_presigned_url('get_object', Params = {'Bucket': self.core.config["object_storage_info"]["bucket"], 'Key': "backup/" + str(json["user"]) + "/" + str(json["key"]) + ".zip"}, ExpiresIn = json["expire"])
+                params = {'Bucket': self.core.config["object_storage_info"]["bucket"], 'Key': "backup/" + str(json["user"]) + "/" + str(json["key"]) + ".zip", "ResponseContentType": "application/zip"}
+                if json["filename"] is not None:
+                    params["ResponseContentDisposition"] = "attachment; filename=\"" + json["filename"] + ".zip\""
+                result = self.core.boto.generate_presigned_url('get_object', Params=params, ExpiresIn=json["expire"])
                 return SResponse("success", result).web()
             except Exception:
+                print(traceback.format_exc())
                 return SResponse("internal.error").web()
 
         @self.core.fast_api.route("/file/backup/list", methods=["POST"])

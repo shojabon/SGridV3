@@ -198,12 +198,13 @@ class SGridV3MasterAPI:
         }
         return self.__post_data(self.api_endpoint + "/file/backup/status", payload)
 
-    def backup_get_download_link(self, user: str, key: str, expire: int = 3):
+    def backup_get_download_link(self, user: str, key: str, expire: int = 3, file_name=None):
         payload = {
             "master_key": self.master_key,
             "user": user,
             "key": key,
-            "expire": expire
+            "expire": expire,
+            "filename": file_name
         }
         return self.__post_data(self.api_endpoint + "/file/backup/download", payload)
 
